@@ -1,0 +1,7 @@
+{
+  "source": "Student-run Colab audit, 2026-11-16; official bundle CSV and authors' published train/validation manifests",
+  "train": {"class_0": 7549, "class_1": 7549, "total": 15098, "missing_patient_id": 7447},
+  "validation": {"class_0": 981, "class_1": 981, "total": 1962, "missing_patient_id": 1221},
+  "cross_split_distinct_id_overlap": {"isic_id": 0, "patient_id": 433, "lesion_id": 488}
+}
+
