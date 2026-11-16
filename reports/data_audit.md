@@ -30,6 +30,10 @@ Sources: [train-set-metadata.csv](https://github.com/mmu-dermatology-research/is
 
 Across train and validation, `isic_id` overlap is 0, but **433 nonmissing patient IDs** and **488 nonmissing lesion IDs** appear on both sides. These are counts of distinct overlapping identifiers, not counts of affected rows. They indicate group overlap and a substantial risk of optimistic validation performance. They do not by themselves establish whether exact duplicate image files appear across splits.
 
+![Class balance, missing patient IDs, and distinct train/validation ID overlap](../figures/data_audit.svg)
+
+**Figure 1.** Published split audit. The first panel shows image counts by the authors' `class` label; the second shows missing `patient_id` values; the third counts distinct identifiers present in both splits. Overlap counts are **identifiers**, not affected image counts. Source values: student-run Colab audit, recorded in [`results/data_audit_counts.json`](../results/data_audit_counts.json). Regenerate with `python scripts/plot_data_audit.py`.
+
 ## Protocol decision
 
 1. Use the authors' manifest split for a clearly labeled **paper-protocol baseline** and document the group overlap. Keep published scores separate from measured scores. The paper's separate ISIC 2020 Kaggle test remains unreplicated unless its protocol can be accessed.
