@@ -34,7 +34,9 @@ Under a leakage-safe evaluation, does adding age, sex, and anatomical site to a 
 3. Inspect the actual CSV columns and image paths. Fill the column variables in the audit cell only after inspection.
 4. Save the schema, missingness, label, duplicate, and image-match outputs before defining a split or model.
 
-Training and measured result commands will be added after the data audit. See [REPRODUCE.md](REPRODUCE.md) for the current protocol gate.
+See [REPRODUCE.md](REPRODUCE.md) for the baseline command, known deviations, and protocol limits. Measured results will be added only after Colab execution.
+
+The [baseline Colab notebook](notebooks/02_baselines_colab.ipynb) runs metadata-only, image-only, and late-fusion models using the authors' train/validation manifests. It saves the measured outputs to your Google Drive. These are reduced-backbone baselines with known patient/lesion overlap across the published split; they are not the paper's external-test scores.
 
 The patient-group split smoke check runs without the dataset:
 
