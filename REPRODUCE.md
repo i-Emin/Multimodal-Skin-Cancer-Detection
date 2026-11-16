@@ -14,6 +14,8 @@ The starter notebook has been generated and JSON-validated locally. It has **not
 
 If the published split or test protocol cannot be reproduced, label the run a **new internal experiment**, not a direct numerical reproduction.
 
+`src/splits.py` provides a deterministic patient-group split for an **internal experiment only**. It refuses incomplete patient IDs, duplicate image IDs, split overlap, and splits missing a class. It does not silently fall back to image-level splitting. Verify it without data using `python scripts/check_split.py`. Actual class counts and split identifiers must be recorded after inspecting the downloaded CSV.
+
 ## Planned comparison
 
 - Image-only model.
