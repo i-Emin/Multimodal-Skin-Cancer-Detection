@@ -46,6 +46,10 @@ python scripts/check_split.py
 
 The six verified starting sources and the instructor's required comparison fields are in [`reports/literature_matrix.md`](reports/literature_matrix.md). This is a reading matrix; detailed critical analysis remains to be completed from the full papers.
 
+## Data audit
+
+The first [data audit](reports/data_audit.md) confirms the authors' train/validation sizes and class balance but finds patient and lesion identifiers shared across those splits. The project will report the paper-protocol baseline with that limitation and run a separate leakage-controlled internal experiment.
+
 ## Result provenance
 
 Published paper numbers and our own measurements will be stored separately. There are no measured results in this repository yet. No clinical use is intended.
