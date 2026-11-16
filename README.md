@@ -35,6 +35,12 @@ Under a leakage-safe evaluation, does adding age, sex, and anatomical site to a 
 
 Training and measured result commands will be added after the data audit. See [REPRODUCE.md](REPRODUCE.md) for the current protocol gate.
 
+The patient-group split smoke check runs without the dataset:
+
+```bash
+python scripts/check_split.py
+```
+
 ## Literature review
 
 The six verified starting sources and the instructor's required comparison fields are in [`reports/literature_matrix.md`](reports/literature_matrix.md). This is a reading matrix; detailed critical analysis remains to be completed from the full papers.
