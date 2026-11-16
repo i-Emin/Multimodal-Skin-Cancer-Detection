@@ -7,7 +7,7 @@ The starter notebook has been generated and JSON-validated locally. It has **not
 ## Protocol gate before training
 
 1. Run the notebook on the official ISIC-DICM-17K bundle and record CSV columns, file paths, missingness, label distribution, duplicate IDs, and patient/lesion ID coverage.
-2. Locate and pin the original study's training/validation identifiers if available. Document whether its ISIC 2020 test evaluation can be repeated.
+2. Compare the authors' published `train-set-metadata.csv` and `valid-set-metadata.csv` manifests to the official bundle by `isic_id`. These files provide the authors' binary `class` field; the bundle's `diagnosis_1` is not a substitute. Document whether its ISIC 2020 test evaluation can be repeated.
 3. Verify that no patient, lesion, or duplicate image crosses train/validation/test boundaries. Where identifiers are missing, state what cannot be established.
 4. Fit metadata preprocessing on the training split only. Exclude diagnosis, diagnosis confirmation, label, and post-diagnosis variables from inputs.
 5. Freeze the split, preprocessing, seeds, and metric definitions before comparing methods.
