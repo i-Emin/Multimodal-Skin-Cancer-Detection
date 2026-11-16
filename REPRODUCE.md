@@ -16,6 +16,8 @@ If the published split or test protocol cannot be reproduced, label the run a **
 
 `src/splits.py` provides a deterministic patient-group split for an **internal experiment only**. It refuses incomplete patient IDs, duplicate image IDs, split overlap, and splits missing a class. It does not silently fall back to image-level splitting. Verify it without data using `python scripts/check_split.py`. Actual class counts and split identifiers must be recorded after inspecting the downloaded CSV.
 
+Initial published-manifest counts and group-overlap findings are recorded in `reports/data_audit.md`. Do not treat its validation set as patient or lesion independent.
+
 ## Planned comparison
 
 - Image-only model.
