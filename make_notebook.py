@@ -103,6 +103,42 @@ else:
     print('Images found by filename stem:', int(ids.isin(image_by_stem).sum()), '/', len(ids))
     print('Unmatched IDs:', ids[~ids.isin(image_by_stem)].head(10).tolist())
 """),
+    md("""## Compare the authors' published train/validation manifests
+
+The authors' repository contains `train-set-metadata.csv` and `valid-set-metadata.csv`, with an explicit `class` column. Use these manifests instead of inferring the paper's binary labels from the official archive's `diagnosis_1` field. The official bundle's CSV has no `benign_malignant` field. This audit checks matching IDs, class balance, and patient/lesion overlap; inspect the results before training. The ISIC 2020 Kaggle test remains a separate evaluation.
+"""),
+    code("""BASE = 'https://raw.githubusercontent.com/mmu-dermatology-research/isic-dicm-17k/main/'
+train_manifest = pd.read_csv(BASE + 'train-set-metadata.csv', low_memory=False)
+valid_manifest = pd.read_csv(BASE + 'valid-set-metadata.csv', low_memory=False)
+archive_meta = pd.read_csv(DATA_DIR / 'metadata.csv', low_memory=False)
+
+print('Manifest shapes:', train_manifest.shape, valid_manifest.shape)
+print('Train columns:', list(train_manifest.columns))
+print('Validation columns:', list(valid_manifest.columns))
+for name, part in [('train', train_manifest), ('valid', valid_manifest)]:
+    print(name, 'class counts:', part['class'].value_counts(dropna=False).to_dict())
+    print(name, 'duplicate ISIC IDs:', int(part['isic_id'].duplicated().sum()))
+    print(name, 'IDs absent from bundle CSV:', int((~part['isic_id'].isin(archive_meta['isic_id'])).sum()))
+    for key in ['patient_id', 'lesion_id']:
+        print(name, key, 'missing:', int(part[key].isna().sum()))
+
+for key in ['isic_id', 'patient_id', 'lesion_id']:
+    a = set(train_manifest[key].dropna().astype(str))
+    b = set(valid_manifest[key].dropna().astype(str))
+    print(key, 'train/valid overlap:', len(a & b))
+
+combined = pd.concat([train_manifest[['isic_id', 'class']], valid_manifest[['isic_id', 'class']]])
+print('Combined unique IDs:', combined['isic_id'].nunique(), 'of', len(archive_meta))
+print('Combined class counts:', combined['class'].value_counts(dropna=False).to_dict())
+print('Combined IDs absent from bundle CSV:', int((~combined['isic_id'].isin(archive_meta['isic_id'])).sum()))
+
+# Compare published labels to archive diagnosis fields; do not treat these
+# post-diagnosis fields as model inputs.
+label_check = combined.merge(archive_meta[['isic_id', 'diagnosis_1', 'diagnosis_2']],
+                             on='isic_id', how='left', validate='one_to_one')
+print('class x diagnosis_1:')
+print(pd.crosstab(label_check['class'], label_check['diagnosis_1'], dropna=False))
+"""),
     md("""## Split gate
 
 Before model training: locate the original validation image IDs in the authors' repository or supplemental files and identify how ISIC 2020 test evaluation can be repeated. For a separate internal experiment, split by patient ID where complete and verify zero overlap; when IDs are incomplete, investigate lesion IDs and duplicate images. Fit imputers and encoders **only on training data**. Keep the test set untouched while choosing a method.
