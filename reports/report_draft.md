@@ -32,18 +32,20 @@ The official bundle contains 17,060 JPEG images and a 17,060-row, 28-column meta
 
 After interim fusion epoch metrics were visible, but before the completed fixed-final-epoch result or any improved-model outcome, we fixed one intervention: mask the entire encoded metadata vector to zero for 30% of training examples. The matched p=0 fusion baseline is the control. Both models are evaluated on clean validation data and with all validation metadata masked. The primary outcome is the difference in macro-F1 under missing metadata; clean-input macro-F1 is the cost check. Balanced accuracy, ROC-AUC, confusion matrices, training time, and peak GPU memory are secondary observations. The fixed plan is in [improvement_hypothesis.md](improvement_hypothesis.md).
 
-## 6. Results — pending measured artifacts
+## 6. Results — baselines measured, improvement pending
 
 | Model / condition | Accuracy | Balanced accuracy | Macro-F1 | ROC-AUC | Time | Peak GPU memory |
 |---|---:|---:|---:|---:|---:|---:|
-| Metadata-only, clean | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON |
-| Image-only, clean | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON |
-| Fusion control, clean | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON |
+| Metadata-only, clean | 0.6580 | 0.6580 | 0.6572 | 0.7145 | 0.24 min | 17.2 MB |
+| Image-only, clean | 0.8191 | 0.8191 | 0.8190 | 0.9085 | 96.31 min | 602.0 MB |
+| Fusion control, clean | 0.8140 | 0.8140 | 0.8133 | 0.9135 | 95.52 min | 808.6 MB |
 | Fusion control, missing metadata | pending JSON | pending JSON | pending JSON | pending JSON | same training run | same training run |
 | Fusion dropout 0.3, clean | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON |
 | Fusion dropout 0.3, missing metadata | pending JSON | pending JSON | pending JSON | pending JSON | same training run | same training run |
 
-Required result artifacts: `results/baselines/{metadata,image,fusion}/metrics.json`, `run.json`, and `results/improvement/comparison.json` from Google Drive. Report the final fixed epoch for all baselines. Calculate fusion minus image-only on the same validation set, and intervention minus control separately for clean and missing-metadata conditions. Add confusion matrices and at least one failure analysis from prediction CSVs.
+The baseline rows above were read from the student's saved `metrics.json` and `run.json`, not transcribed from screenshots. All report the fixed eighth epoch on 1,962 validation examples. Fusion minus image-only macro-F1 is **-0.0057**, while ROC-AUC is **+0.0051**. At threshold 0.5, fusion has 48 more melanoma false negatives and 38 fewer non-melanoma false positives than image-only. A higher ranking AUC thus does not imply an improved operating-point F1 or melanoma recall. Figure 2 and exact confusion matrices are in [baseline_results.md](baseline_results.md). This is one seed on a group-overlapping split; no independent-patient effect is claimed.
+
+Required remaining artifact: `results/improvement/comparison.json` and improvement `metrics.json` from Google Drive. Calculate intervention minus control separately for clean and missing-metadata conditions. Add the matched confusion matrices, resource comparison, and at least one failure analysis from prediction CSVs.
 
 ## 7. Limitations and interpretation
 
