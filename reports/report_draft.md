@@ -2,7 +2,7 @@
 
 Repository: https://github.com/i-Emin/Multimodal-Skin-Cancer-Detection
 
-**Status (17 November 2026):** Baseline fusion and the pre-specified improvement are still being measured. This draft contains no invented scores. Replace the result fields from saved Colab JSON files before PDF submission.
+**Status (17 November 2026):** Baseline fusion is being rerun after a Colab interruption; the pre-specified improvement remains to be run. This draft contains no invented scores. Replace the result fields from saved Colab JSON files before PDF submission.
 
 ## Abstract
 
@@ -10,11 +10,13 @@ This study examines whether clinical metadata improves binary melanoma classific
 
 ## 1. Research question and source study
 
-Ahammed et al. (CVPR Workshops 2025) curate ISIC-DICM-17K and investigate dermoscopic images combined with age, sex, and anatomical location. The central question here is whether late fusion adds value over an image-only baseline under matched experimental settings. A second question is whether training with missing metadata protects performance when clinical features are unavailable. Our ResNet18 implementation is a reduced-backbone, partial reproduction of the comparison, not an exact reproduction of the paper's external-test score. The original study's separate ISIC 2020 test procedure is outside our measured evaluation.
+Ahammed et al. (CVPR Workshops 2025) curate ISIC-DICM-17K and investigate dermoscopic images combined with age, sex, and anatomical location. The specific published comparison is the transfer-learning EfficientNet-B3 row in their Table 5: image-only AUC **0.8754** and image+metadata AUC **0.8851** on the **10,982-image ISIC 2020 Kaggle test**. The predicted direction is a positive image+metadata difference; a zero or negative within-implementation difference would question whether this benefit transfers to our reduced setup. These published scores are **not directly comparable** to our 1,962-image validation scores. The paper's Table 5 also shows that adding metadata did not help every transfer-learning backbone, which tempers a universal-benefit claim. Our ResNet18 implementation is a reduced-backbone, partial reproduction of the comparison, not an exact reproduction of the paper's external-test score.
 
 ## 2. Literature synthesis
 
-The source-verified six-paper comparison matrix is in [literature_matrix.md](literature_matrix.md). Ahammed et al. provide the direct dataset and image/metadata comparison. Pacheco and Krohling motivate clinical-feature aggregation, but their smartphone images differ from our dermoscopy setting. Das et al. compare simple and attention-based fusion on HAM10000, motivating a simple concatenation baseline before trying additional complexity. Sonuç et al. emphasize clinical-feature ablations in a seven-class task; that evidence motivates explicit missing-feature testing but its scores cannot be transferred to our binary task. Pacheco et al.'s PAD-UFES-20 data paper documents a different capture domain and patient metadata; Yap et al. (2018) provide an earlier multiple-image-modality comparison. Different labels, devices, and splits prevent direct comparison of numerical scores across these studies.
+**Search and selection.** We began with the selected CVPRW paper and its official dataset repository, then searched PubMed/PMC, publisher pages, and citation/DOI links for skin-lesion image+metadata models, fusion comparisons, dataset provenance, and missing-feature ablations. We retained six papers spanning the source study, prior aggregation, competing fusion mechanisms, feature ablation, data construction, and historical multi-image fusion. We checked titles, years, and claims against primary full texts where available. This is a focused narrative selection, not a systematic review.
+
+The six-paper comparison matrix is in [literature_matrix.md](literature_matrix.md). Ahammed et al. provide the direct dataset and image/metadata comparison. Pacheco and Krohling motivate clinical-feature aggregation, but their smartphone images differ from our dermoscopy setting. Das et al. compare simple and attention-based fusion on HAM10000, motivating a simple concatenation baseline before trying additional complexity. Sonuç et al. emphasize clinical-feature ablations in a seven-class task; that evidence motivates explicit missing-feature testing but its scores cannot be transferred to our binary task. Pacheco et al.'s PAD-UFES-20 data paper documents a different capture domain and patient metadata; Yap et al. (2018) provide an earlier multiple-image-modality comparison. Different labels, devices, and splits prevent direct comparison of numerical scores across these studies.
 
 ## 3. Data and split audit
 
@@ -22,7 +24,9 @@ The official bundle contains 17,060 JPEG images and a 17,060-row, 28-column meta
 
 ## 4. Methods and reproducibility
 
-The baselines use the same published manifests, seed 42, eight epochs, batch size 32, and learning rate 1e-4. The image and fusion branches use ImageNet-pretrained ResNet18; a metadata MLP encodes age, sex, and anatomical site using training-fitted preprocessing. Fusion concatenates image and metadata representations before classification. The metadata-only model provides a modality control. Validation uses deterministic image preprocessing. The training code, notebook, exact settings, source digest, per-epoch history, predictions, and metrics are in the repository or are saved by Colab to Drive as described in [REPRODUCE.md](../REPRODUCE.md). The student's L4 GPU is the training device. Measured wall time and GPU memory must be copied from run artifacts.
+**Technical mechanism.** The image branch maps a dermoscopic image to a 512-dimensional ResNet18 feature vector. The metadata branch median-imputes and standardizes age, one-hot encodes sex and general anatomical site using training-only statistics, then maps that vector through a 64-unit ReLU layer. Fusion concatenates the two representations and applies a two-layer classification head to produce two logits. Cross-entropy trains all parameters; AdamW updates them. Metadata-only and image-only models remove the other modality. This is late feature fusion, unlike attention methods that model pairwise interactions before classification.
+
+**Protocol.** The baselines use the same published manifests, seed 42, eight epochs, batch size 32, and learning rate 1e-4. Image and fusion use ImageNet-pretrained ResNet18. Training images are resized/cropped/flipped; validation uses resize and center crop at 224 pixels with ImageNet normalization. The original paper used 100 epochs, a cosine schedule with warm-up, Adam for EfficientNet/ResNet, early stopping, and best-epoch test reporting; our fixed-final-epoch, eight-epoch AdamW run is a deliberate compute reduction. The training code, source digest, history, predictions, settings, and metrics are saved as described in [REPRODUCE.md](../REPRODUCE.md). The student's L4 GPU is the training device. Measured wall time and GPU memory must come from run artifacts.
 
 ## 5. Improvement hypothesis and controlled comparison
 
