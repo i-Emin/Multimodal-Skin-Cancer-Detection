@@ -233,6 +233,7 @@ def run(args: argparse.Namespace) -> None:
         "epochs": args.epochs, "batch_size": args.batch_size, "lr": args.lr,
         "backbone": None if args.mode == "metadata" else "ImageNet pretrained ResNet18",
         "optimizer": "AdamW(weight_decay=1e-4)", "loss": "CrossEntropyLoss",
+        "metadata_dropout_p": float(getattr(args, "metadata_dropout_p", 0.0)),
         "reported_epoch_rule": "fixed final epoch; no best-validation-epoch selection",
         "image_preprocessing": "train: resize256/random_resized_crop224/hflip; valid: shortest-side resize224/center_crop224; ImageNet normalization",
         "metadata_features": ["age_approx", "sex", "anatom_site_general"],
@@ -256,6 +257,12 @@ def run(args: argparse.Namespace) -> None:
         epoch_start = time.perf_counter()
         for image, meta, target, _ in train_loader:
             image, meta, target = image.to(device), meta.to(device), target.to(device)
+            drop_p = float(getattr(args, "metadata_dropout_p", 0.0))
+            if drop_p:
+                if args.mode != "fusion" or not (0 < drop_p < 1):
+                    raise ValueError("metadata dropout requires fusion mode and 0 < p < 1")
+                missing = torch.rand((len(meta), 1), device=device) < drop_p
+                meta = meta.masked_fill(missing, 0.0)
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast(device_type="cuda", enabled=device.type == "cuda"):
                 logits = model(image, meta)
@@ -297,6 +304,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--save-checkpoint", action="store_true")
+    parser.add_argument("--metadata-dropout-p", type=float, default=0.0)
     args = parser.parse_args()
     if args.epochs < 1 or args.batch_size < 1:
         parser.error("epochs and batch-size must be positive")
