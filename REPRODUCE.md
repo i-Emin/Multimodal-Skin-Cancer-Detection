@@ -1,49 +1,42 @@
 # Reproduction record
 
-## Current state
+## Scope and data
 
-The starter notebook has been generated and JSON-validated locally. It has **not** been executed on Colab or against the dataset. Hardware timings, metrics, and trained checkpoints do not yet exist.
+This project tests the **concept** of combining dermoscopic images and clinical metadata on the [Ahammed et al. (2025)](https://openaccess.thecvf.com/content/CVPR2025W/MULA2025/html/Ahammed_Skin_Lesion_Classification_Using_Dermoscopic_Images_and_Clinical_Metadata_Insights_CVPRW_2025_paper.html) data and published manifests. It does not repeat the original external ISIC 2020 test. The paper's reported score and our validation measurements answer different questions and must remain in separate tables.
 
-## Protocol gate before training
+The official bundle has 17,060 images and metadata rows. The authors' manifests have 15,098 train and 1,962 validation samples with balanced binary `class` labels. The bundle's `diagnosis_1` is not the target. The published split has 433 shared nonmissing patient IDs and 488 shared lesion IDs across train/validation; image IDs have zero overlap. Missing patient IDs are common. See [data audit](reports/data_audit.md).
 
-1. Run the notebook on the official ISIC-DICM-17K bundle and record CSV columns, file paths, missingness, label distribution, duplicate IDs, and patient/lesion ID coverage.
-2. Compare the authors' published `train-set-metadata.csv` and `valid-set-metadata.csv` manifests to the official bundle by `isic_id`. These files provide the authors' binary `class` field; the bundle's `diagnosis_1` is not a substitute. Document whether its ISIC 2020 test evaluation can be repeated.
-3. Verify that no patient, lesion, or duplicate image crosses train/validation/test boundaries. Where identifiers are missing, state what cannot be established.
-4. Fit metadata preprocessing on the training split only. Exclude diagnosis, diagnosis confirmation, label, and post-diagnosis variables from inputs.
-5. Freeze the split, preprocessing, seeds, and metric definitions before comparing methods.
+## Colab sequence
 
-If the published split or test protocol cannot be reproduced, label the run a **new internal experiment**, not a direct numerical reproduction.
+1. Select a GPU runtime. Run [notebook 01](notebooks/01_dataset_audit_colab.ipynb) for the data audit if starting from scratch.
+2. Run [notebook 02](notebooks/02_baselines_colab.ipynb) for three baselines. It reuses `/content/isic-dicm-17k` or downloads the official ~6.9 GB bundle and saves under `MyDrive/YZM5110/results/baselines/<mode>/`.
+3. Confirm `MyDrive/YZM5110/results/baselines/fusion/final_model.pt` exists. Then run [notebook 03](notebooks/03_metadata_dropout_colab.ipynb). It can restore the dataset after a runtime reset and saves under `MyDrive/YZM5110/results/improvement/`.
+4. Archive small, non-sensitive JSON/CSV outputs and generated figures in this public repository after review. Keep weights, raw images, and raw patient metadata private.
 
-`src/splits.py` provides a deterministic patient-group split for an **internal experiment only**. It refuses incomplete patient IDs, duplicate image IDs, split overlap, and splits missing a class. It does not silently fall back to image-level splitting. Verify it without data using `python scripts/check_split.py`. Actual class counts and split identifiers must be recorded after inspecting the downloaded CSV.
+If notebook 02 is interrupted after metadata/image complete, run its setup cells and invoke only the unfinished mode. The current code writes `history.csv` each epoch but writes model weights only at the final epoch. A history file cannot resume training.
 
-Initial published-manifest counts and group-overlap findings are recorded in `reports/data_audit.md`. Do not treat its validation set as patient or lesion independent.
-
-## Planned comparison
-
-- Image-only ImageNet-pretrained ResNet18.
-- Metadata-only MLP.
-- Image plus metadata late fusion with the same ResNet18 backbone.
-- One justified improvement and an isolating control, trained under matched conditions.
-
-Report macro-F1, balanced accuracy, accuracy, ROC-AUC where valid, confusion matrix, per-class scores, training time, and uncertainty. Keep authors' results in a separate table from locally measured results.
-
-## Baseline execution
-
-Open `notebooks/02_baselines_colab.ipynb` in Colab with GPU, then run its cells in order. It reuses the official bundle in `/content/isic-dicm-17k` or downloads it if absent. It reads the authors' manifests directly from their repository. The notebook embeds code generated from `src/baseline.py` and records its SHA-256 digest in each `run.json`; a Git commit is recorded when run as a repository module. Results and final checkpoints go to `MyDrive/YZM5110/results/baselines/<mode>/`; checkpoints stay out of GitHub.
-
-From the repository in a prepared Colab runtime, the equivalent command for one mode is:
+Equivalent command for one mode in a prepared GPU environment:
 
 ```bash
-python -m src.baseline --mode image --data-dir /content/isic-dicm-17k --output-dir /content/drive/MyDrive/YZM5110/results/baselines --epochs 8 --batch-size 32 --lr 1e-4 --seed 42 --save-checkpoint
+python -m src.baseline --mode fusion --data-dir /content/isic-dicm-17k --output-dir /content/drive/MyDrive/YZM5110/results/baselines --epochs 8 --batch-size 32 --lr 1e-4 --seed 42 --save-checkpoint
 ```
 
-Repeat with `--mode metadata` and `--mode fusion`. Each mode writes `run.json`, `history.csv`, `metrics.json`, `validation_predictions.csv`, and optionally `final_model.pt`. The fixed **final epoch** is reported; the validation set is not used to pick the best epoch. Actual dependency versions and GPU identity are written to `run.json`.
+Repeat with `--mode metadata` and `--mode image`. Each mode writes `run.json` (configuration, dependencies, GPU, source digest), `history.csv`, `metrics.json` (fixed final epoch, confusion matrix, per-class scores, time, peak GPU memory), `validation_predictions.csv`, and optional `final_model.pt`. The notebooks embed the versioned source and record its SHA-256. The original manifests are read from the authors' GitHub at runtime; freeze their revision for a final archival rerun.
 
-Deviations from Ahammed et al.: ResNet18 instead of the paper's selected EfficientNet-B3 comparison, 8 rather than 100 epochs, AdamW with fixed learning rate rather than the paper's optimizer/schedule, and train-time random crop/flip augmentation. Validation images follow shortest-side resize to 224 and center crop to 224. The paper's Kaggle ISIC 2020 test is not evaluated. Published train/validation group overlap is documented in `reports/data_audit.md`. Any measured validation score must be qualified by that overlap and the smaller training budget. An independent group-controlled experiment remains required.
+## Improvement
 
-## Data and licensing
+The [hypothesis](reports/improvement_hypothesis.md) was recorded before the baseline fusion outcome. The only deliberate training change is `metadata_dropout_p=0.3`. The control is the existing p=0 fusion checkpoint with matched seed, split, epochs, batch size, learning rate, and backbone. Notebook 03 evaluates both on clean and fully missing metadata and saves `comparison.json` and per-image prediction CSVs.
 
-Official collection: https://api.isic-archive.com/doi/isic-dicm-17k/
+## Deviations and limits
 
-Do not commit the downloaded bundle, images, raw patient metadata, credentials, or large checkpoints. The ISIC page lists CC-0, CC-BY, and CC-BY-NC licenses across content; preserve required attribution and noncommercial limits.
+- ResNet18 replaces the selected EfficientNet-B3 comparison; our budget is eight epochs rather than 100.
+- AdamW with a fixed learning rate and training crop/flip differ from the paper. Validation uses resize and center crop at 224 pixels.
+- The paper's separate ISIC 2020 test is not evaluated. Our published validation split has patient/lesion overlap.
+- A single seed and split cannot establish stable between-run uncertainty. Image-level intervals cannot repair group leakage.
+
+The matched controls support a within-implementation comparison. They do not establish numerical reproduction of the paper's external-test score or generalization to new patients.
+
+## Data and licenses
+
+Collection: https://api.isic-archive.com/doi/isic-dicm-17k/ . Images carry CC-0, CC-BY, or CC-BY-NC terms. Follow individual attribution and noncommercial limits. Do not commit the raw bundle, credentials, or large checkpoints.
 
