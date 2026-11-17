@@ -23,6 +23,14 @@ python -m src.baseline --mode fusion --data-dir /content/isic-dicm-17k --output-
 
 Repeat with `--mode metadata` and `--mode image`. Each mode writes `run.json` (configuration, dependencies, GPU, source digest), `history.csv`, `metrics.json` (fixed final epoch, confusion matrix, per-class scores, time, peak GPU memory), `validation_predictions.csv`, and optional `final_model.pt`. The notebooks embed the versioned source and record its SHA-256. The original manifests are read from the authors' GitHub at runtime; freeze their revision for a final archival rerun.
 
+After all four training runs and notebook 03's matched evaluation complete, generate the report table and SVG from the saved JSON outputs:
+
+```bash
+python scripts/summarize_results.py --drive-root /content/drive/MyDrive/YZM5110/results --output-dir reports/generated
+```
+
+The output is `reports/generated/measured_results.md` and `model_metrics.svg`. Review and commit these only after checking the source JSONs. The script fails on missing measured files rather than inserting placeholder scores.
+
 ## Improvement
 
 The [hypothesis](reports/improvement_hypothesis.md) was recorded before the baseline fusion outcome. The only deliberate training change is `metadata_dropout_p=0.3`. The control is the existing p=0 fusion checkpoint with matched seed, split, epochs, batch size, learning rate, and backbone. Notebook 03 evaluates both on clean and fully missing metadata and saves `comparison.json` and per-image prediction CSVs.
