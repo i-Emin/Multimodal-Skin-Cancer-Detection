@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 432" role="img" aria-label="Measured validation macro F1 and ROC AUC">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="24" y="34" font-family="Arial,sans-serif" font-size="19" font-weight="bold" fill="#172435">Measured validation metrics</text>
+<text x="24" y="55" font-family="Arial,sans-serif" font-size="12" fill="#536275">Published split has patient/lesion overlap; scores are not independent-patient estimates.</text>
+<text x="24" y="104" font-family="Arial,sans-serif" font-size="13" fill="#172435">Metadata-only</text>
+<rect x="250" y="91" width="328.6" height="15" fill="#237c87"/>
+<text x="585.6" y="103" font-family="Arial,sans-serif" font-size="12" fill="#172435">F1 0.657</text>
+<rect x="250" y="112" width="357.3" height="15" fill="#e69948"/>
+<text x="614.3" y="124" font-family="Arial,sans-serif" font-size="12" fill="#172435">AUC 0.715</text>
+<text x="24" y="161" font-family="Arial,sans-serif" font-size="13" fill="#172435">Image-only</text>
+<rect x="250" y="148" width="409.5" height="15" fill="#237c87"/>
+<text x="666.5" y="160" font-family="Arial,sans-serif" font-size="12" fill="#172435">F1 0.819</text>
+<rect x="250" y="169" width="454.2" height="15" fill="#e69948"/>
+<text x="711.2" y="181" font-family="Arial,sans-serif" font-size="12" fill="#172435">AUC 0.908</text>
+<text x="24" y="218" font-family="Arial,sans-serif" font-size="13" fill="#172435">Fusion control, clean</text>
+<rect x="250" y="205" width="406.6" height="15" fill="#237c87"/>
+<text x="663.6" y="217" font-family="Arial,sans-serif" font-size="12" fill="#172435">F1 0.813</text>
+<rect x="250" y="226" width="456.8" height="15" fill="#e69948"/>
+<text x="713.8" y="238" font-family="Arial,sans-serif" font-size="12" fill="#172435">AUC 0.914</text>
+<text x="24" y="275" font-family="Arial,sans-serif" font-size="13" fill="#172435">Fusion control, missing</text>
+<rect x="250" y="262" width="403.8" height="15" fill="#237c87"/>
+<text x="660.8" y="274" font-family="Arial,sans-serif" font-size="12" fill="#172435">F1 0.808</text>
+<rect x="250" y="283" width="454.8" height="15" fill="#e69948"/>
+<text x="711.8" y="295" font-family="Arial,sans-serif" font-size="12" fill="#172435">AUC 0.910</text>
+<text x="24" y="332" font-family="Arial,sans-serif" font-size="13" fill="#172435">Dropout 0.3, clean</text>
+<rect x="250" y="319" width="413.3" height="15" fill="#237c87"/>
+<text x="670.3" y="331" font-family="Arial,sans-serif" font-size="12" fill="#172435">F1 0.827</text>
+<rect x="250" y="340" width="456.0" height="15" fill="#e69948"/>
+<text x="713.0" y="352" font-family="Arial,sans-serif" font-size="12" fill="#172435">AUC 0.912</text>
+<text x="24" y="389" font-family="Arial,sans-serif" font-size="13" fill="#172435">Dropout 0.3, missing</text>
+<rect x="250" y="376" width="410.5" height="15" fill="#237c87"/>
+<text x="667.5" y="388" font-family="Arial,sans-serif" font-size="12" fill="#172435">F1 0.821</text>
+<rect x="250" y="397" width="454.7" height="15" fill="#e69948"/>
+<text x="711.7" y="409" font-family="Arial,sans-serif" font-size="12" fill="#172435">AUC 0.909</text>
+</svg>
