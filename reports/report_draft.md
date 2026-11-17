@@ -1,4 +1,4 @@
-# YZM5110 research report — working draft
+# Multimodal Skin Lesion Classification: A Reduced Reproduction and Missing-Metadata Robustness Study
 
 Repository: https://github.com/i-Emin/Multimodal-Skin-Cancer-Detection
 
@@ -12,13 +12,19 @@ This study examines whether clinical metadata improves binary melanoma classific
 
 Ahammed et al. [1] curate ISIC-DICM-17K and investigate dermoscopic images combined with age, sex, and anatomical location. The specific published comparison is the transfer-learning EfficientNet-B3 row in their Table 5: image-only AUC **0.8754** and image+metadata AUC **0.8851** on the **10,982-image ISIC 2020 Kaggle test**. The predicted direction is a positive image+metadata difference; a zero or negative within-implementation difference would question whether this benefit transfers to our reduced setup. These published scores are **not directly comparable** to our 1,962-image validation scores. The paper's Table 5 also shows that adding metadata did not help every transfer-learning backbone, which tempers a universal-benefit claim. Our ResNet18 implementation is a reduced-backbone, partial reproduction of the comparison, not an exact reproduction of the paper's external-test score.
 
+| Published experiment [1] | Image-only ROC-AUC | Image + metadata ROC-AUC | Evaluation set |
+|---|---:|---:|---|
+| Transfer EfficientNet-B3 | 0.8754 | 0.8851 | ISIC 2020 Kaggle test, 10,982 images |
+
+**Table 1.** Authors' reported result. It is kept separate from our validation measurements in Section 7.
+
 ## 2. Literature synthesis
 
 **Search and selection.** We began with the selected CVPRW paper and its official dataset repository, then searched PubMed/PMC, publisher pages, and citation/DOI links for skin-lesion image+metadata models, fusion comparisons, dataset provenance, and missing-feature ablations. We retained six papers spanning the source study, prior aggregation, competing fusion mechanisms, feature ablation, data construction, and historical multi-image fusion. We checked titles, years, and claims against primary full texts where available. This is a focused narrative selection, not a systematic review.
 
 The six-paper comparison matrix is in [literature_matrix.md](literature_matrix.md). Ahammed et al. [1] provide the direct dataset and image/metadata comparison. Pacheco and Krohling [2] motivate clinical-feature aggregation, but their smartphone images differ from our dermoscopy setting. Das et al. [3] compare simple and attention-based fusion on HAM10000, motivating a concatenation baseline before adding complexity; the prose and preprocessing figure describe different split proportions, so its protocol needs caution. Sonuç et al. [4] emphasize clinical-feature ablations in a seven-class task; its scores cannot be transferred to our binary task. Pacheco et al.'s PAD-UFES-20 data paper [5] documents a different capture domain. Yap et al. [6] provide a useful counterexample: adding metadata to their two-image model lowered melanoma AUC from 0.866 to 0.861, although multiclass mAP rose slightly. Different labels, devices, and splits prevent direct comparison of numerical scores across these studies.
 
-## 3. Data and split audit
+## 3. Technical concept and data audit
 
 The official bundle contains 17,060 JPEG images and a 17,060-row, 28-column metadata table. The authors' manifests assign 15,098 training and 1,962 validation samples, balanced within each split. Every manifest ID matches the bundle table, and no image ID occurs in both splits. However, 433 distinct nonmissing patient IDs and 488 lesion IDs occur in both splits; 7,447 training and 1,221 validation rows lack patient IDs. These are overlapping *identifier* counts, not affected-row counts. The archive `diagnosis_1` field is not used as the binary target; we use the authors' `class` field. The full audit is in [data_audit.md](data_audit.md).
 
@@ -26,7 +32,7 @@ The official bundle contains 17,060 JPEG images and a 17,060-row, 28-column meta
 
 **Figure 1.** Class balance, missing patient identifiers, and distinct cross-split identifier overlap; the latter counts identifiers, not rows.
 
-## 4. Methods and reproducibility
+## 4. Reproduction implementation and deviations
 
 **Technical mechanism.** The image branch maps a dermoscopic image to a 512-dimensional ResNet18 feature vector. The metadata branch median-imputes and standardizes age, one-hot encodes sex and general anatomical site using training-only statistics, then maps that vector through a 64-unit ReLU layer. Fusion concatenates the two representations and applies a two-layer classification head to produce two logits. Cross-entropy trains all parameters; AdamW updates them. Metadata-only and image-only models remove the other modality. This is late feature fusion, unlike attention methods that model pairwise interactions before classification.
 
@@ -40,7 +46,13 @@ The official bundle contains 17,060 JPEG images and a 17,060-row, 28-column meta
 
 After interim fusion epoch metrics were visible, but before the completed fixed-final-epoch result or any improved-model outcome, we fixed one intervention: mask the entire encoded metadata vector to zero for 30% of training examples. The matched p=0 fusion baseline is the control. Both models are evaluated on clean validation data and with all validation metadata masked. The primary outcome is the difference in macro-F1 under missing metadata; clean-input macro-F1 is the cost check. Balanced accuracy, ROC-AUC, confusion matrices, training time, and peak GPU memory are secondary observations. The fixed plan is in [improvement_hypothesis.md](improvement_hypothesis.md).
 
-## 6. Results — baselines measured, improvement pending
+## 6. Experimental design and measures
+
+The three modality baselines use the same training and validation manifests. We compare them at the fixed eighth epoch without selecting the best validation score. Accuracy is the fraction of correct binary decisions at threshold 0.5; balanced accuracy averages sensitivity over the two classes; macro-F1 averages their F1 scores; ROC-AUC measures ranking across thresholds. The confusion matrix uses rows for true labels and columns for predictions. Because melanoma is class 1, false negatives (row 1, column 0) deserve separate attention. GPU time is the measured Colab wall time, while peak GPU memory is PyTorch's maximum allocated memory, not total device use.
+
+The improvement changes one training input rule and retains the split, backbone, seed, epoch count, optimizer, learning rate, and batch size. The existing p=0 fusion checkpoint is the control. Both checkpoints are evaluated on the same images with clean metadata and with the encoded metadata set entirely to zero. We report the predefined missing-input macro-F1 difference and the clean-input cost, with other metrics and resource use as supporting evidence. This artificial missingness test does not estimate clinical missingness frequency. A single seed and the group-overlapping validation split limit uncertainty and external validity.
+
+## 7. Results — baselines measured, improvement pending
 
 | Model / condition | Accuracy | Balanced accuracy | Macro-F1 | ROC-AUC | Time | Peak GPU memory |
 |---|---:|---:|---:|---:|---:|---:|
@@ -63,18 +75,22 @@ The baseline rows above were read from the student's saved `metrics.json` and `r
 
 Required remaining artifact: `results/improvement/comparison.json` and improvement `metrics.json` from Google Drive. Calculate intervention minus control separately for clean and missing-metadata conditions. Add the matched confusion matrices, resource comparison, and at least one failure analysis from prediction CSVs.
 
-## 7. Limitations and interpretation
+## 8. Limitations, conclusions, and unresolved questions
 
 The authors' validation split has patient and lesion overlap. Missing group IDs prevent a complete patient-independent check on all examples. A higher validation score therefore cannot establish performance on new patients. The reduced backbone and training recipe differ from the selected paper, while its separate test set is not evaluated. A single seed and a single split do not quantify variability. The missing-metadata experiment measures resilience to a defined artificial absence condition, not the full range of real clinical missingness. No clinical deployment claim follows from these results.
 
+The measured baseline suggests that metadata can raise ranking AUC while worsening fixed-threshold macro-F1 and melanoma recall in this implementation. The planned dropout test will show whether missing-input robustness can improve under the same split; its outcome may be positive, neutral, or negative. A future study should freeze patient/lesion-group splits before model selection, repeat multiple seeds, test across acquisition sites, and evaluate calibration and clinically chosen operating thresholds.
+
+**Reproducibility and AI-use disclosure.** The public repository linked on page 1 contains code, Colab notebooks, data-access instructions, saved aggregate results, and figure-generation scripts. Exact baseline source SHA-256 and hardware settings are in `results/baselines/*/run.json`; large checkpoints and per-image predictions stay in the student's Drive. Codex assisted with source discovery, coding, visualization, and report editing. The student ran the Colab experiments and remains responsible for citation checks, interpretation, and defending the work.
+
 ## References
 
-1. Ahammed et al. *Skin Lesion Classification Using Dermoscopic Images and Clinical Metadata: Insights from Multimodal Models*. CVPR Workshops, 2025. https://openaccess.thecvf.com/content/CVPR2025W/MULA2025/html/Ahammed_Skin_Lesion_Classification_Using_Dermoscopic_Images_and_Clinical_Metadata_Insights_CVPRW_2025_paper.html
-2. Pacheco and Krohling. *The impact of patient clinical information on automated skin cancer detection*. Computers in Biology and Medicine, 2020. https://doi.org/10.1016/j.compbiomed.2019.103545
-3. Das, Agarwal, and Shetty. *Comparative analysis of multimodal architectures for effective skin lesion detection using clinical and image data*. Frontiers in AI, 2025. https://doi.org/10.3389/frai.2025.1608837
-4. Sonuç et al. *Interpretable multimodal fusion for skin lesion classification using dermoscopic images and patient metadata*. Frontiers in Medicine, 2026. https://doi.org/10.3389/fmed.2026.1871689
-5. Pacheco et al. *PAD-UFES-20: A skin lesion dataset composed of patient data and clinical images collected from smartphones*. Data in Brief, 2020. https://doi.org/10.1016/j.dib.2020.106221
-6. Yap, Yolland, and Tschandl. *Multimodal skin lesion classification using deep learning*. Experimental Dermatology, 2018. https://doi.org/10.1111/exd.13777
+1. S. Ahammed, X. Cui, W. Lu, and M. H. Yap, “Skin lesion classification using dermoscopic images and clinical metadata: Insights from multimodal models,” *Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops*, pp. 222–230, 2025. [Open-access paper](https://openaccess.thecvf.com/content/CVPR2025W/MULA2025/papers/Ahammed_Skin_Lesion_Classification_Using_Dermoscopic_Images_and_Clinical_Metadata_Insights_CVPRW_2025_paper.pdf).
+2. A. G. C. Pacheco and R. A. Krohling, “The impact of patient clinical information on automated skin cancer detection,” *Computers in Biology and Medicine*, vol. 116, article 103545, 2020. [doi:10.1016/j.compbiomed.2019.103545](https://doi.org/10.1016/j.compbiomed.2019.103545).
+3. A. Das, V. Agarwal, and N. P. Shetty, “Comparative analysis of multimodal architectures for effective skin lesion detection using clinical and image data,” *Frontiers in Artificial Intelligence*, vol. 8, article 1608837, 2025. [doi:10.3389/frai.2025.1608837](https://doi.org/10.3389/frai.2025.1608837).
+4. E. Sonuç, Q. Saihood, Y. Yargı Baydilli, and E. Özcan, “Interpretable multimodal fusion for skin lesion classification using dermoscopic images and patient metadata,” *Frontiers in Medicine*, vol. 13, article 1871689, 2026. [doi:10.3389/fmed.2026.1871689](https://doi.org/10.3389/fmed.2026.1871689).
+5. A. G. C. Pacheco et al., “PAD-UFES-20: A skin lesion dataset composed of patient data and clinical images collected from smartphones,” *Data in Brief*, vol. 32, article 106221, 2020. [doi:10.1016/j.dib.2020.106221](https://doi.org/10.1016/j.dib.2020.106221).
+6. J. Yap, W. Yolland, and P. Tschandl, “Multimodal skin lesion classification using deep learning,” *Experimental Dermatology*, vol. 27, no. 11, pp. 1261–1267, 2018. [doi:10.1111/exd.13777](https://doi.org/10.1111/exd.13777).
 
 ## Appendix A. Literature comparison matrix
 
