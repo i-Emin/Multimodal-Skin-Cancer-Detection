@@ -74,7 +74,7 @@ def markdown_to_html(source: str, draft: bool) -> str:
                     if field.strip():
                         label, value = field.strip().split(":", 1)
                         inner.append(f"<p class='field'><b>{html.escape(label)}:</b> {inline(value.strip())}</p>")
-                cls = "study break-before" if match.group(1).startswith("[5]") else "study"
+                cls = "study"
                 blocks.append(f"<div class='{cls}'>" + "".join(inner) + "</div>")
             i += 1
             continue
@@ -116,7 +116,6 @@ CSS = """
 body { font-family: sans-serif; font-size: 9.3pt; color: #192536; line-height: 1.42; }
 h1 { font-size: 20pt; color: #133b50; margin: 0 0 7pt; }
 h2 { font-size: 12.5pt; color: #13536a; margin: 17pt 0 6pt; page-break-after: avoid; }
-h2.appendix { page-break-before: always; }
 h3 { font-size: 10pt; color: #13536a; margin: 0 0 5pt; }
 p { margin: 0 0 8pt; text-align: justify; }
 p.figure { text-align: center; margin: 11pt 0 5pt; }
@@ -132,7 +131,6 @@ code { font-family: monospace; font-size: 8pt; color: #375c70; }
 a { color: #126a85; text-decoration: none; }
 .draft { color: #a55326; font-size: 9pt; font-weight: bold; margin-bottom: 8pt; }
 .study { border-left: 2pt solid #7db3be; padding-left: 8pt; margin: 0 0 12pt; page-break-inside: avoid; }
-.break-before { page-break-before: always; }
 .study .field { margin: 0 0 3pt; font-size: 8.4pt; }
 """
 
