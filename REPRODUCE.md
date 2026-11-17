@@ -33,7 +33,7 @@ The output is `reports/generated/measured_results.md` and `model_metrics.svg`. R
 
 ## Improvement
 
-The [hypothesis](reports/improvement_hypothesis.md) was recorded before the baseline fusion outcome. The only deliberate training change is `metadata_dropout_p=0.3`. The control is the existing p=0 fusion checkpoint with matched seed, split, epochs, batch size, learning rate, and backbone. Notebook 03 evaluates both on clean and fully missing metadata and saves `comparison.json` and per-image prediction CSVs.
+The [hypothesis](reports/improvement_hypothesis.md) was recorded after some interim fusion epochs were visible, but before the completed fixed-final-epoch fusion outcome or any improved-model outcome. The only deliberate training change is `metadata_dropout_p=0.3`. The control is the existing p=0 fusion checkpoint with matched seed, split, epochs, batch size, learning rate, and backbone. Notebook 03 evaluates both on clean and fully missing metadata and saves `comparison.json` and per-image prediction CSVs.
 
 ## Deviations and limits
 
