@@ -12,6 +12,7 @@ Updated: 17 November 2026. Due: **18 November 2026 before the presentation sessi
 | Reproduction implementation and three baselines | Code prepared | `src/baseline.py`, notebook 02; metadata/image completed in student's Drive, fusion being rerun |
 | Pre-specified one-change improvement and control | Code prepared | `reports/improvement_hypothesis.md`, notebook 03; no improved result yet |
 | Report structure and references | Draft | `reports/report_draft.md`; real measured values, critical synthesis, and PDF still needed |
+| Saved-result table and figure generator | Prepared | `scripts/summarize_results.py`; must run on real Drive JSONs after improvement |
 
 ## After fusion finishes
 
