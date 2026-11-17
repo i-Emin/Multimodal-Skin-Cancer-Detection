@@ -31,6 +31,8 @@ python scripts/summarize_results.py --drive-root /content/drive/MyDrive/YZM5110/
 
 The output is `reports/generated/measured_results.md` and `model_metrics.svg`. Review and commit these only after checking the source JSONs. The script fails on missing measured files rather than inserting placeholder scores.
 
+Rebuild the report's baseline figures with `python scripts/plot_report_figures.py`. After the final results and interpretation have replaced every pending field in `reports/report_draft.md`, run `python scripts/build_report_pdf.py --final`. The PDF script refuses final mode while draft markers remain. Inspect the rendered A4 pages before submission.
+
 ## Improvement
 
 The [hypothesis](reports/improvement_hypothesis.md) was recorded after some interim fusion epochs were visible, but before the completed fixed-final-epoch fusion outcome or any improved-model outcome. The only deliberate training change is `metadata_dropout_p=0.3`. The control is the existing p=0 fusion checkpoint with matched seed, split, epochs, batch size, learning rate, and backbone. Notebook 03 evaluates both on clean and fully missing metadata and saves `comparison.json` and per-image prediction CSVs.
