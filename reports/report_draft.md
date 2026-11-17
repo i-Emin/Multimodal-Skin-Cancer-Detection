@@ -2,7 +2,7 @@
 
 Repository: https://github.com/i-Emin/Multimodal-Skin-Cancer-Detection
 
-**Status (17 November 2026):** Baseline fusion is being rerun after a Colab interruption; the pre-specified improvement remains to be run. This draft contains no invented scores. Replace the result fields from saved Colab JSON files before PDF submission.
+**Status (17 November 2026):** All three baseline runs are archived; the improvement is training with resumable checkpoints. Pending cells will be replaced from saved Colab JSON before PDF submission.
 
 ## Abstract
 
@@ -20,11 +20,19 @@ The six-paper comparison matrix is in [literature_matrix.md](literature_matrix.m
 
 ## 3. Data and split audit
 
-The official bundle contains 17,060 JPEG images and a 17,060-row, 28-column metadata table. The authors' manifests assign 15,098 training and 1,962 validation samples, balanced within each split. Every manifest ID matches the bundle table, and no image ID occurs in both splits. However, 433 distinct nonmissing patient IDs and 488 lesion IDs occur in both splits; 7,447 training and 1,221 validation rows lack patient IDs. These are overlapping *identifier* counts, not affected-row counts. The archive `diagnosis_1` field is not used as the binary target; we use the authors' `class` field. The full audit and Figure 1 are in [data_audit.md](data_audit.md).
+The official bundle contains 17,060 JPEG images and a 17,060-row, 28-column metadata table. The authors' manifests assign 15,098 training and 1,962 validation samples, balanced within each split. Every manifest ID matches the bundle table, and no image ID occurs in both splits. However, 433 distinct nonmissing patient IDs and 488 lesion IDs occur in both splits; 7,447 training and 1,221 validation rows lack patient IDs. These are overlapping *identifier* counts, not affected-row counts. The archive `diagnosis_1` field is not used as the binary target; we use the authors' `class` field. The full audit is in [data_audit.md](data_audit.md).
+
+![Figure 1. Data audit](../figures/data_audit.svg)
+
+**Figure 1.** Class balance, missing patient identifiers, and distinct cross-split identifier overlap; the latter counts identifiers, not rows.
 
 ## 4. Methods and reproducibility
 
 **Technical mechanism.** The image branch maps a dermoscopic image to a 512-dimensional ResNet18 feature vector. The metadata branch median-imputes and standardizes age, one-hot encodes sex and general anatomical site using training-only statistics, then maps that vector through a 64-unit ReLU layer. Fusion concatenates the two representations and applies a two-layer classification head to produce two logits. Cross-entropy trains all parameters; AdamW updates them. Metadata-only and image-only models remove the other modality. This is late feature fusion, unlike attention methods that model pairwise interactions before classification.
+
+![Figure 2. Late-fusion architecture](../figures/fusion_architecture.svg)
+
+**Figure 2.** Implemented two-branch model; the orange masking intervention is used only in the improved training run.
 
 **Protocol.** The baselines use the same published manifests, seed 42, eight epochs, batch size 32, and learning rate 1e-4. Image and fusion use ImageNet-pretrained ResNet18. Training images are resized/cropped/flipped; validation uses resize and center crop at 224 pixels with ImageNet normalization. The original paper used 100 epochs, a cosine schedule with warm-up, Adam for EfficientNet/ResNet, early stopping, and best-epoch test reporting; our fixed-final-epoch, eight-epoch AdamW run is a deliberate compute reduction. The training code, source digest, history, predictions, settings, and metrics are saved as described in [REPRODUCE.md](../REPRODUCE.md). The student's L4 GPU is the training device. Measured wall time and GPU memory must come from run artifacts.
 
@@ -43,7 +51,15 @@ After interim fusion epoch metrics were visible, but before the completed fixed-
 | Fusion dropout 0.3, clean | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON |
 | Fusion dropout 0.3, missing metadata | pending JSON | pending JSON | pending JSON | pending JSON | same training run | same training run |
 
-The baseline rows above were read from the student's saved `metrics.json` and `run.json`, not transcribed from screenshots. All report the fixed eighth epoch on 1,962 validation examples. Fusion minus image-only macro-F1 is **-0.0057**, while ROC-AUC is **+0.0051**. At threshold 0.5, fusion has 48 more melanoma false negatives and 38 fewer non-melanoma false positives than image-only. The paired [error analysis](baseline_error_analysis.md) shows that fusion corrects 46 of the image model's melanoma errors but introduces 94 new ones. A higher ranking AUC thus does not imply an improved operating-point F1 or melanoma recall. Figure 2 and exact confusion matrices are in [baseline_results.md](baseline_results.md). This is one seed on a group-overlapping split; no independent-patient effect is claimed.
+The baseline rows above were read from the student's saved `metrics.json` and `run.json`, not transcribed from screenshots. All report the fixed eighth epoch on 1,962 validation examples. Fusion minus image-only macro-F1 is **-0.0057**, while ROC-AUC is **+0.0051**. At threshold 0.5, fusion has 48 more melanoma false negatives and 38 fewer non-melanoma false positives than image-only. The paired [error analysis](baseline_error_analysis.md) shows that fusion corrects 46 of the image model's melanoma errors but introduces 94 new ones. A higher ranking AUC thus does not imply an improved operating-point F1 or melanoma recall. Exact confusion matrices are in [baseline_results.md](baseline_results.md). This is one seed on a group-overlapping split; no independent-patient effect is claimed.
+
+![Figure 3. Eight-epoch training curves](../figures/training_curves.svg)
+
+**Figure 3.** Training loss and validation macro-F1 and ROC-AUC from the saved epoch histories; the fixed eighth epoch is reported.
+
+![Figure 4. Image-only and fusion confusion matrices](../figures/baseline_confusion.svg)
+
+**Figure 4.** Final-epoch confusion matrices. Rows show true class and columns predicted class; melanoma is class 1.
 
 Required remaining artifact: `results/improvement/comparison.json` and improvement `metrics.json` from Google Drive. Calculate intervention minus control separately for clean and missing-metadata conditions. Add the matched confusion matrices, resource comparison, and at least one failure analysis from prediction CSVs.
 
