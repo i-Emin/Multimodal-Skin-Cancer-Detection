@@ -22,14 +22,13 @@ Updated: 17 November 2026. Due: **18 November 2026 before the presentation sessi
 4. Generate final tables/figures from saved outputs. Inspect confusion matrices, class-specific recall/precision, at least a few favorable and unfavorable examples, time and peak GPU memory, and clean/missing tradeoff. Preserve the fixed final epoch and report a negative improvement honestly if observed.
 5. Complete the report's eight required sections, put the repository URL on page 1, export `<LastName>_YZM5110_Research.pdf`, inspect the rendered pages, and add the PDF to the repository or submit it through the course channel as required.
 6. Pin the final public repository version with a commit or tag and record its identifier in the report. Verify a clean Colab launch, the exact data access steps, source revision, dependencies, configs, and figure/table scripts.
-7. Prepare a short presentation that explains the question, selected paper, data leakage, matched baselines, intervention, results, limits, and what the student learned.
 
 ## Highest-priority gaps
 
 - **Measured artifacts are not yet in GitHub.** The student's Drive contains metadata/image runs; fusion is ongoing. Results in screenshots are preliminary until the saved JSON/CSV is reviewed.
 - **Improvement training and matched evaluation remain.** The planned p=0.3 run may take a similar time to fusion on the L4.
 - **The literature matrix is a starting matrix**, not yet the required in-depth critique of at least five papers. Check objectives, preprocessing/split units, hardware/code availability, baseline fairness, and limitations against full texts.
-- **No final PDF or presentation is complete.** The report draft contains conspicuous pending-result fields and must not be submitted as final.
+- **No final PDF is complete.** The report draft contains conspicuous pending-result fields and must not be submitted as final.
 - **No patient-independent evaluation has been run.** The published split's group overlap must be disclosed prominently; do not claim clinical generalization.
 
 Course brief: `YZM5110_Research_Project.pdf`, supplied by the student. This checklist summarizes its deliverables; the PDF itself remains the authority for grading and submission details.
