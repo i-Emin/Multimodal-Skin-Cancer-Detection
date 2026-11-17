@@ -1,34 +1,19 @@
-# Delivery status and final-run checklist
+# Delivery status
 
-Updated: 17 November 2026 after all three baseline runs completed. Due: **18 November 2026 before the presentation session**, according to the course project brief. The student plans to finish today.
+Updated 17 November 2026. The course brief requests the research PDF before the 18 November presentation session.
 
-## Completed or prepared
+| Requirement | Current evidence |
+|---|---|
+| Public reproducible repository | `README.md`, `REPRODUCE.md`, three Colab notebooks, `src/baseline.py`, scripts and settings in saved `run.json` files |
+| Official data audit | `reports/data_audit.md`, `results/data_audit_counts.json`, `figures/data_audit.svg` |
+| At least five papers with critical comparison | Six numbered sources in `reports/report_draft.md` and `reports/literature_matrix.md` |
+| Partial reproduction | Three fixed-epoch baseline outputs in `results/baselines/` |
+| One controlled improvement | Metadata dropout 0.3, with four matched clean/missing conditions in `results/improvement/` |
+| Quantitative results and figures | `reports/generated/measured_results.md`, four baseline/report figures and six-condition comparison figure |
+| Failure and limitations analysis | `reports/baseline_error_analysis.md`, `reports/improvement_error_analysis.md`, and report Sections 7–8 |
+| PDF | `output/pdf/Ipek_YZM5110_Research.pdf`, rendered and visually checked locally; repository URL appears on page 1 |
 
-| Requirement | Status | Evidence / caveat |
-|---|---|---|
-| Public project repository and licensed data instructions | Prepared | `README.md`, `REPRODUCE.md`, `data/README.md` |
-| Initial data audit and visual | Prepared | `reports/data_audit.md`, `figures/data_audit.svg`, `results/data_audit_counts.json` |
-| Six-paper source list and comparison structure | Draft | `reports/literature_matrix.md`; close reading and critical synthesis still need strengthening |
-| Reproduction implementation and three baselines | Measured and archived | `results/baselines/{metadata,image,fusion}/`, `reports/baseline_results.md`; all fixed epoch 8 |
-| Pre-specified one-change improvement and control | Code prepared | `reports/improvement_hypothesis.md`, notebook 03; no improved result yet |
-| Report structure and references | Draft | `reports/report_draft.md`; real measured values, critical synthesis, and PDF still needed |
-| Saved-result table and figure generator | Prepared | `scripts/summarize_results.py`; must run on real Drive JSONs after improvement |
+The validation split has overlapping patient and lesion identifiers, so all measured scores are within that published split and are not independent-patient estimates. The paper's separate ISIC 2020 test score is not numerically compared with our validation scores. Large checkpoints, raw images, metadata, and per-image predictions remain in the student's Drive.
 
-## After improvement finishes
-
-1. Notebook 03 is running on the L4 GPU and saving resumable epoch checkpoints. Confirm `results/improvement/fusion/final_model.pt`, `metrics.json`, and `results/improvement/comparison.json` exist when it finishes.
-2. Read the improvement's saved JSON/CSV outputs from Drive. Archive only small, non-sensitive summaries; keep model weights, raw data, and per-image predictions private.
-3. Generate final tables/figures from saved outputs. Inspect confusion matrices, class-specific recall/precision, favorable and unfavorable cases, time and peak GPU memory, and the clean/missing tradeoff. Preserve the fixed final epoch and report a negative improvement honestly if observed.
-4. Complete the report's eight required sections, put the repository URL on page 1, export `<LastName>_YZM5110_Research.pdf`, inspect the rendered pages, and add the PDF to the repository or submit it through the course channel as required.
-5. Pin the final public repository version with a commit or tag and record its identifier in the report. Verify a clean Colab launch, the exact data access steps, source revision, dependencies, configs, and figure/table scripts.
-
-## Highest-priority gaps
-
-- **Baseline artifacts are now in GitHub.** Saved `metrics.json`, `run.json`, and `history.csv` were read from the student's Drive. Per-image predictions and checkpoints remain private. The improvement outputs are still pending.
-- **Improvement training and matched evaluation remain.** The planned p=0.3 run may take a similar time to fusion on the L4.
-- **The literature matrix is a starting matrix**, not yet the required in-depth critique of at least five papers. Check objectives, preprocessing/split units, hardware/code availability, baseline fairness, and limitations against full texts.
-- **No final PDF is complete.** The report draft contains conspicuous pending-result fields and must not be submitted as final.
-- **No patient-independent evaluation has been run.** The published split's group overlap must be disclosed prominently; do not claim clinical generalization.
-
-Course brief: `YZM5110_Research_Project.pdf`, supplied by the student. This checklist summarizes its deliverables; the PDF itself remains the authority for grading and submission details.
+The final PDF must be submitted through the course's requested channel. A public repository revision or tag should be retained for the submitted version. The project brief, supplied by the student, is authoritative for exact submission mechanics.
 
