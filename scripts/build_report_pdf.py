@@ -6,6 +6,7 @@ results are replaced and reviewed; final mode refuses placeholder text.
 from __future__ import annotations
 
 import argparse
+import base64
 import html
 import re
 from pathlib import Path
@@ -109,11 +110,19 @@ def markdown_to_html(source: str, draft: bool) -> str:
             i += 1
         blocks.append(f"<p>{inline(' '.join(para))}</p>")
     label = '<div class="draft">DRAFT - improvement results pending</div>' if draft else ""
-    return "<html><body>" + label + "".join(blocks) + "</body></html>"
+    cover = ('<div class="cover"><img src="figures/yildiz_logo.png" alt="Yildiz Technical University"/>'
+             '<p class="university">Yıldız Technical University</p>'
+             '<p class="course">YZM5110 – Multi Model Learning</p></div>')
+    return "<html><body>" + label + cover + "".join(blocks) + "</body></html>"
 
 
 CSS = """
 body { font-family: sans-serif; font-size: 9.3pt; color: #192536; line-height: 1.42; }
+.cover { text-align: center; margin: 0 0 32pt; }
+.cover img { height: 68pt; width: 68pt; }
+.cover p { text-align: center; margin: 0; }
+.cover .university { font-size: 12pt; font-weight: bold; color: #133b50; margin-top: 3pt; }
+.cover .course { font-size: 10pt; font-weight: bold; color: #133b50; margin-top: 2pt; }
 h1 { font-size: 20pt; color: #133b50; margin: 0 0 7pt; }
 h2 { font-size: 12.5pt; color: #13536a; margin: 17pt 0 6pt; page-break-after: avoid; }
 h3 { font-size: 9.5pt; color: #13536a; margin: 0 0 3pt; }
@@ -130,12 +139,15 @@ ul, ol { margin: 3pt 0 9pt 16pt; }
 code { font-family: monospace; font-size: 8pt; color: #375c70; }
 a { color: #126a85; text-decoration: none; }
 .draft { color: #a55326; font-size: 9pt; font-weight: bold; margin-bottom: 8pt; }
-.study { border-left: 2pt solid #7db3be; padding-left: 8pt; margin: 0 0 7pt; page-break-inside: avoid; }
-.study .field { margin: 0 0 2pt; font-size: 8pt; }
+.study { border-left: 2pt solid #7db3be; padding-left: 8pt; margin: 0 0 5pt; page-break-inside: avoid; }
+.study .field { margin: 0 0 1.5pt; font-size: 7.8pt; }
 """
 
 
 def build(final: bool) -> Path:
+    logo = ROOT / "figures" / "yildiz_logo.png"
+    if not logo.exists():
+        logo.write_bytes(base64.b64decode((ROOT / "figures" / "yildiz_logo.png.b64").read_text(encoding="ascii")))
     source = SOURCE.read_text(encoding="utf-8")
     if final and ("pending JSON" in source or "pending measured" in source or "working draft" in source.lower()):
         raise ValueError("Report still contains draft or pending-result markers")
