@@ -22,10 +22,13 @@ Binary melanoma classification using dermoscopic images and clinical metadata. T
 | [`src/baseline.py`](src/baseline.py) | Versioned dataset, model, training, and evaluation implementation |
 | [`reports/literature_matrix.md`](reports/literature_matrix.md) | Six-paper comparison matrix |
 | [`reports/data_audit.md`](reports/data_audit.md) | Data checks, split overlap, and Figure 1 |
+| [`reports/baseline_results.md`](reports/baseline_results.md) | Three measured baseline runs and Figure 2 |
+| [`reports/baseline_error_analysis.md`](reports/baseline_error_analysis.md) | Aggregate paired error analysis without raw IDs |
 | [`reports/improvement_hypothesis.md`](reports/improvement_hypothesis.md) | Pre-specified intervention and outcomes |
 | [`reports/report_draft.md`](reports/report_draft.md) | Report text awaiting final measured outputs |
 | [`REPRODUCE.md`](REPRODUCE.md) | Commands, artifacts, deviations, and limits |
-| [`scripts/summarize_results.py`](scripts/summarize_results.py) | Build a measured-results table and SVG from saved Colab JSON files |
+| [`scripts/summarize_baselines.py`](scripts/summarize_baselines.py) | Rebuild baseline table and Figure 2 from archived JSON files |
+| [`scripts/summarize_results.py`](scripts/summarize_results.py) | Build the complete comparison after improvement |
 | [`data/README.md`](data/README.md) | Data access and licenses; raw data is not uploaded |
 
 ## Run
