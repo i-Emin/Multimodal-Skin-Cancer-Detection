@@ -10,7 +10,7 @@ The official bundle has 17,060 images and metadata rows. The authors' manifests 
 
 1. Select a GPU runtime. Run [notebook 01](notebooks/01_dataset_audit_colab.ipynb) for the data audit if starting from scratch.
 2. Run [notebook 02](notebooks/02_baselines_colab.ipynb) for three baselines. It reuses `/content/isic-dicm-17k` or downloads the official ~6.9 GB bundle and saves under `MyDrive/YZM5110/results/baselines/<mode>/`.
-3. Confirm `MyDrive/YZM5110/results/baselines/fusion/final_model.pt` exists. Then run [notebook 03](notebooks/03_metadata_dropout_colab.ipynb). It can restore the dataset after a runtime reset and saves under `MyDrive/YZM5110/results/improvement/`.
+3. Confirm `MyDrive/YZM5110/results/baselines/fusion/final_model.pt` exists. Then run [notebook 03](notebooks/03_metadata_dropout_colab.ipynb). It can restore the dataset after a runtime reset and saves under `MyDrive/YZM5110/results/improvement/`. During improvement training it writes `fusion/epoch_checkpoint.pt` after each completed epoch; rerunning notebook 03 from the top resumes the same model and optimizer at the next epoch. This safeguard applies only to the updated improvement notebook, not the already-running baseline notebook.
 4. Archive small, non-sensitive JSON/CSV outputs and generated figures in this public repository after review. Keep weights, raw images, and raw patient metadata private.
 
 If notebook 02 is interrupted after metadata/image complete, run its setup cells and invoke only the unfinished mode. The current code writes `history.csv` each epoch but writes model weights only at the final epoch. A history file cannot resume training.
