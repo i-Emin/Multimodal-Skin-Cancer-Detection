@@ -34,6 +34,8 @@ Binary melanoma classification using dermoscopic images and clinical metadata. T
 | [`scripts/plot_report_figures.py`](scripts/plot_report_figures.py) | Rebuild training curves, confusion matrices, and model diagram |
 | [`scripts/build_report_pdf.py`](scripts/build_report_pdf.py) | Render the paginated A4 submission PDF |
 | [`data/README.md`](data/README.md) | Data access and licenses; raw data is not uploaded |
+| [`data/provenance.md`](data/provenance.md) | Pinned upstream manifest reference and retrospective version limit |
+| [`scripts/smoke_test_saved_results.py`](scripts/smoke_test_saved_results.py) | Fast check of archived outputs, with no download or GPU |
 
 ## Run
 
@@ -42,6 +44,8 @@ Select a GPU Colab runtime. Run notebook 02 top to bottom for baselines. Once th
 Do not use "Run all" in notebook 02 after metadata and image training have completed: it repeats them. A Colab runtime reset clears in-memory model weights; `history.csv` alone cannot resume a model. `final_model.pt` is saved at the fixed final epoch. Notebook 03 also saves an epoch checkpoint for resumption.
 
 ## Main measured finding
+
+For a quick check of the saved results, run `python scripts/smoke_test_saved_results.py` from the repository root. It verifies the archived confusion matrices, metrics, fixed epoch, and intervention deltas without downloading the dataset. Full model training requires the licensed data bundle and a GPU.
 
 On the published validation split, image-only macro-F1 is 0.8190; standard fusion is 0.8133 but has slightly higher ROC-AUC (0.9135 versus 0.9085). The p=0.3 metadata-dropout fusion has macro-F1 0.8266 with clean inputs and 0.8210 when all metadata are masked. It exceeds standard fusion by about 0.0133 in both conditions, so the run does not establish an additional missing-input robustness benefit. The split shares patient and lesion identifiers between training and validation; none of these scores estimates independent-patient performance.
 
