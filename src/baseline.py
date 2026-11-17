@@ -251,7 +251,31 @@ def run(args: argparse.Namespace) -> None:
     started = time.perf_counter()
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats()
-    for epoch in range(1, args.epochs + 1):
+    resume_path = output / "epoch_checkpoint.pt"
+    start_epoch = 1
+    prior_peak_mb = 0.0
+    if getattr(args, "resume", False) and resume_path.is_file():
+        # Only load a checkpoint created by this experiment in the student's own Drive.
+        state = torch.load(resume_path, map_location=device, weights_only=False)
+        checked = ("mode", "seed", "epochs", "batch_size", "lr", "backbone",
+                   "metadata_dropout_p", "metadata_preprocessing", "source_sha256")
+        mismatch = [key for key in checked if state["config"][key] != config[key]]
+        if mismatch:
+            raise ValueError(f"Checkpoint configuration differs: {mismatch}")
+        model.load_state_dict(state["model"])
+        optimizer.load_state_dict(state["optimizer"])
+        scaler.load_state_dict(state["scaler"])
+        random.setstate(state["python_rng"])
+        np.random.set_state(state["numpy_rng"])
+        torch.set_rng_state(state["torch_rng"].cpu())
+        if device.type == "cuda" and state["cuda_rng"] is not None:
+            torch.cuda.set_rng_state_all(state["cuda_rng"])
+        generator.set_state(state["loader_rng"].cpu())
+        history = state["history"]
+        prior_peak_mb = state["peak_gpu_memory_mb"]
+        start_epoch = state["epoch"] + 1
+        print(f"Resuming {args.mode} at epoch {start_epoch}", flush=True)
+    for epoch in range(start_epoch, args.epochs + 1):
         model.train()
         losses, seen = 0.0, 0
         epoch_start = time.perf_counter()
@@ -279,17 +303,36 @@ def run(args: argparse.Namespace) -> None:
         history.append(row)
         pd.DataFrame(history).to_csv(output / "history.csv", index=False)
         print(args.mode, row, flush=True)
+        if getattr(args, "resume", False) and epoch < args.epochs:
+            state = {
+                "epoch": epoch, "config": config, "model": model.state_dict(),
+                "optimizer": optimizer.state_dict(), "scaler": scaler.state_dict(),
+                "python_rng": random.getstate(), "numpy_rng": np.random.get_state(),
+                "torch_rng": torch.get_rng_state(),
+                "cuda_rng": torch.cuda.get_rng_state_all() if device.type == "cuda" else None,
+                "loader_rng": generator.get_state(), "history": history,
+                "peak_gpu_memory_mb": max(prior_peak_mb,
+                    torch.cuda.max_memory_allocated() / 1e6 if device.type == "cuda" else 0.0),
+            }
+            temp_path = resume_path.with_suffix(".tmp")
+            torch.save(state, temp_path)
+            temp_path.replace(resume_path)
+            print(f"Saved resumable epoch {epoch}: {resume_path}", flush=True)
         # The fixed final epoch is the reported result. Selecting the best
         # validation epoch and reporting on that same set would add bias.
         if epoch == args.epochs:
             metrics["reported_epoch"] = epoch
-            metrics["total_train_seconds"] = time.perf_counter() - started
-            metrics["peak_gpu_memory_mb"] = (torch.cuda.max_memory_allocated() / 1e6
+            metrics["total_train_seconds"] = (sum(row["seconds"] for row in history)
+                                               if getattr(args, "resume", False)
+                                               else time.perf_counter() - started)
+            metrics["peak_gpu_memory_mb"] = (max(prior_peak_mb, torch.cuda.max_memory_allocated() / 1e6)
                                               if device.type == "cuda" else None)
             (output / "metrics.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
             predictions.to_csv(output / "validation_predictions.csv", index=False)
             if args.save_checkpoint:
                 torch.save(model.state_dict(), output / "final_model.pt")
+            if getattr(args, "resume", False):
+                resume_path.unlink(missing_ok=True)
     print("Saved", output, "total seconds", round(time.perf_counter() - started, 1))
 
 
