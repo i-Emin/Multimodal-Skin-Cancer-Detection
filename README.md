@@ -29,6 +29,8 @@ Binary melanoma classification using dermoscopic images and clinical metadata. T
 | [`REPRODUCE.md`](REPRODUCE.md) | Commands, artifacts, deviations, and limits |
 | [`scripts/summarize_baselines.py`](scripts/summarize_baselines.py) | Rebuild baseline table and Figure 2 from archived JSON files |
 | [`scripts/summarize_results.py`](scripts/summarize_results.py) | Build the complete comparison after improvement |
+| [`scripts/plot_report_figures.py`](scripts/plot_report_figures.py) | Rebuild training curves, confusion matrices, and model diagram |
+| [`scripts/build_report_pdf.py`](scripts/build_report_pdf.py) | Render a paginated A4 draft; final mode refuses pending results |
 | [`data/README.md`](data/README.md) | Data access and licenses; raw data is not uploaded |
 
 ## Run
