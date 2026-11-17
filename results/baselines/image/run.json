@@ -1,0 +1,78 @@
+{
+  "protocol": "authors_train_valid_manifest_group_overlap_present",
+  "paper_score_reproduction": false,
+  "mode": "image",
+  "seed": 42,
+  "epochs": 8,
+  "batch_size": 32,
+  "lr": 0.0001,
+  "backbone": "ImageNet pretrained ResNet18",
+  "optimizer": "AdamW(weight_decay=1e-4)",
+  "loss": "CrossEntropyLoss",
+  "reported_epoch_rule": "fixed final epoch; no best-validation-epoch selection",
+  "image_preprocessing": "train: resize256/random_resized_crop224/hflip; valid: shortest-side resize224/center_crop224; ImageNet normalization",
+  "metadata_features": [
+    "age_approx",
+    "sex",
+    "anatom_site_general"
+  ],
+  "metadata_preprocessing": {
+    "age_median": 60.0,
+    "age_mean": 57.44999337660617,
+    "age_std": 16.9911173505916,
+    "categories": {
+      "sex": [
+        "female",
+        "male",
+        "unknown"
+      ],
+      "anatom_site_general": [
+        "anterior torso",
+        "head/neck",
+        "lateral torso",
+        "lower extremity",
+        "oral/genital",
+        "palms/soles",
+        "posterior torso",
+        "unknown",
+        "upper extremity"
+      ]
+    },
+    "dimension": 13
+  },
+  "split_audit": {
+    "train_rows": 15098,
+    "valid_rows": 1962,
+    "train_classes": {
+      "0": 7549,
+      "1": 7549
+    },
+    "valid_classes": {
+      "0": 981,
+      "1": 981
+    },
+    "missing_patient_id": {
+      "train": 7447,
+      "valid": 1221
+    },
+    "distinct_cross_split_id_overlap": {
+      "isic_id": 0,
+      "patient_id": 433,
+      "lesion_id": 488
+    },
+    "warning": "Published validation is not patient/lesion independent when group overlap is nonzero."
+  },
+  "data_dir": "/content/isic-dicm-17k",
+  "git_commit": null,
+  "source_sha256": "05b186ebf3c28d47307fb553ad44c6e1af5affb7d5e3513e7bdf96c943be0946",
+  "versions": {
+    "torch": "2.14.1+cu130",
+    "torchvision": "0.29.1+cu130",
+    "pandas": "2.2.3",
+    "numpy": "2.4.6",
+    "sklearn": "1.6.1"
+  },
+  "device": "cuda",
+  "gpu": "NVIDIA L4"
+}
+
