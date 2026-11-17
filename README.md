@@ -2,7 +2,7 @@
 
 Binary melanoma classification using dermoscopic images and clinical metadata. This is a **partial, reduced-compute reproduction** of [Ahammed et al. (CVPR Workshops 2025)](https://openaccess.thecvf.com/content/CVPR2025W/MULA2025/html/Ahammed_Skin_Lesion_Classification_Using_Dermoscopic_Images_and_Clinical_Metadata_Insights_CVPRW_2025_paper.html), followed by one pre-specified missing-metadata experiment.
 
-**Status (17 November 2026):** The data audit, metadata-only training, and image-only training have been performed in the student's Colab. Fusion was restarted after a Colab session interruption. Measured outputs currently remain in the student's Google Drive and are **not yet archived here**. No completed fusion or improvement result is claimed. See [delivery status](reports/delivery_status.md).
+**Status (17 November 2026):** The audit, three baselines, and metadata-dropout experiment are complete. Small measured result artifacts and report figures are archived here. The final [research report](reports/report_draft.md) and [measured comparison](reports/generated/measured_results.md) include the results and limits; the submission PDF is generated locally by `scripts/build_report_pdf.py --final`.
 
 ## Research design
 
@@ -25,19 +25,25 @@ Binary melanoma classification using dermoscopic images and clinical metadata. T
 | [`reports/baseline_results.md`](reports/baseline_results.md) | Three measured baseline runs and Figure 2 |
 | [`reports/baseline_error_analysis.md`](reports/baseline_error_analysis.md) | Aggregate paired error analysis without raw IDs |
 | [`reports/improvement_hypothesis.md`](reports/improvement_hypothesis.md) | Pre-specified intervention and outcomes |
-| [`reports/report_draft.md`](reports/report_draft.md) | Report text awaiting final measured outputs |
+| [`reports/report_draft.md`](reports/report_draft.md) | Completed report text and numbered references |
+| [`reports/generated/measured_results.md`](reports/generated/measured_results.md) | Six-condition measured table and matrices |
+| [`reports/improvement_error_analysis.md`](reports/improvement_error_analysis.md) | Aggregate paired error analysis for the intervention |
 | [`REPRODUCE.md`](REPRODUCE.md) | Commands, artifacts, deviations, and limits |
 | [`scripts/summarize_baselines.py`](scripts/summarize_baselines.py) | Rebuild baseline table and Figure 2 from archived JSON files |
-| [`scripts/summarize_results.py`](scripts/summarize_results.py) | Build the complete comparison after improvement |
+| [`scripts/summarize_results.py`](scripts/summarize_results.py) | Rebuild the complete comparison from saved JSON |
 | [`scripts/plot_report_figures.py`](scripts/plot_report_figures.py) | Rebuild training curves, confusion matrices, and model diagram |
-| [`scripts/build_report_pdf.py`](scripts/build_report_pdf.py) | Render a paginated A4 draft; final mode refuses pending results |
+| [`scripts/build_report_pdf.py`](scripts/build_report_pdf.py) | Render the paginated A4 submission PDF |
 | [`data/README.md`](data/README.md) | Data access and licenses; raw data is not uploaded |
 
 ## Run
 
 Select a GPU Colab runtime. Run notebook 02 top to bottom for baselines. Once the fusion `final_model.pt` is saved, run notebook 03 for the matched improvement. Notebook 03 can restore the official dataset in a new runtime and resume its own training from an epoch checkpoint in Drive, but it requires the fusion baseline checkpoint. Full instructions and result paths are in [REPRODUCE.md](REPRODUCE.md).
 
-Do not use "Run all" in notebook 02 after metadata and image training have completed: it repeats them. A Colab runtime reset clears in-memory model weights; `history.csv` alone cannot resume a model. `final_model.pt` is saved at the fixed final epoch.
+Do not use "Run all" in notebook 02 after metadata and image training have completed: it repeats them. A Colab runtime reset clears in-memory model weights; `history.csv` alone cannot resume a model. `final_model.pt` is saved at the fixed final epoch. Notebook 03 also saves an epoch checkpoint for resumption.
+
+## Main measured finding
+
+On the published validation split, image-only macro-F1 is 0.8190; standard fusion is 0.8133 but has slightly higher ROC-AUC (0.9135 versus 0.9085). The p=0.3 metadata-dropout fusion has macro-F1 0.8266 with clean inputs and 0.8210 when all metadata are masked. It exceeds standard fusion by about 0.0133 in both conditions, so the run does not establish an additional missing-input robustness benefit. The split shares patient and lesion identifiers between training and validation; none of these scores estimates independent-patient performance.
 
 ## Provenance and responsible use
 
