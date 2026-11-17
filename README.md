@@ -25,6 +25,7 @@ Binary melanoma classification using dermoscopic images and clinical metadata. T
 | [`reports/improvement_hypothesis.md`](reports/improvement_hypothesis.md) | Pre-specified intervention and outcomes |
 | [`reports/report_draft.md`](reports/report_draft.md) | Report text awaiting final measured outputs |
 | [`REPRODUCE.md`](REPRODUCE.md) | Commands, artifacts, deviations, and limits |
+| [`scripts/summarize_results.py`](scripts/summarize_results.py) | Build a measured-results table and SVG from saved Colab JSON files |
 | [`data/README.md`](data/README.md) | Data access and licenses; raw data is not uploaded |
 
 ## Run
