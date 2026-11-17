@@ -1,6 +1,6 @@
 # Improvement experiment: metadata dropout
 
-Written on 2026-11-17 while the initial fusion baseline was still running. No improved-model outcomes had been observed when this plan was written.
+Written on 2026-11-17 while the initial fusion baseline was still running. Interim fusion epoch metrics were visible in Colab, but the completed fixed-final-epoch fusion result and all improved-model outcomes had not been observed when this plan was written. The intervention and primary endpoint were fixed at that point.
 
 ## Question and intervention
 
