@@ -1,12 +1,14 @@
 # Multimodal Skin Lesion Classification: A Reduced Reproduction and Missing-Metadata Robustness Study
 
+Ibrahim Emin Ipek · YZM5110 Multimodal Learning Research Project · 17 November 2026
+
 Repository: https://github.com/i-Emin/Multimodal-Skin-Cancer-Detection
 
-**Status (17 November 2026):** All three baseline runs are archived; the improvement is training with resumable checkpoints. Pending cells will be replaced from saved Colab JSON before PDF submission.
+**Completed experiment (17 November 2026).** All measurements below were read from saved Colab artifacts after the fixed eighth epoch.
 
 ## Abstract
 
-This study examines whether clinical metadata improves binary melanoma classification from dermoscopic images and whether training with missing metadata improves robustness. We audit ISIC-DICM-17K and train metadata-only, image-only, and late-fusion baselines on the authors' published split. We then compare the fusion control against a single pre-specified intervention that masks all clinical features for 30% of training examples. The published split contains shared patient and lesion identifiers across training and validation, limiting claims of independent generalization. Final measured results and conclusions will be inserted from Colab artifacts.
+This study tests clinical metadata in binary melanoma classification from dermoscopic images and a pre-specified missing-metadata training intervention. We audit ISIC-DICM-17K, train metadata-only, image-only, and late-fusion baselines, and compare standard fusion with training that masks clinical features for 30% of examples. Fusion yields higher ROC-AUC than image-only (0.9135 versus 0.9085), but lower macro-F1 (0.8133 versus 0.8190). Metadata dropout improves macro-F1 over standard fusion by 0.0133 both with metadata present and fully masked; the improvement is not specific to missing inputs. The published split shares patient and lesion identifiers across training and validation, so these single-seed scores do not establish new-patient performance.
 
 ## 1. Research question and source study
 
@@ -40,7 +42,7 @@ The official bundle contains 17,060 JPEG images and a 17,060-row, 28-column meta
 
 **Figure 2.** Implemented two-branch model; the orange masking intervention is used only in the improved training run.
 
-**Protocol.** The baselines use the same published manifests, seed 42, eight epochs, batch size 32, and learning rate 1e-4. Image and fusion use ImageNet-pretrained ResNet18. Training images are resized/cropped/flipped; validation uses resize and center crop at 224 pixels with ImageNet normalization. The original paper used 100 epochs, a cosine schedule with warm-up, Adam for EfficientNet/ResNet, early stopping, and best-epoch test reporting; our fixed-final-epoch, eight-epoch AdamW run is a deliberate compute reduction. The training code, source digest, history, predictions, settings, and metrics are saved as described in [REPRODUCE.md](../REPRODUCE.md). The student's L4 GPU is the training device. Measured wall time and GPU memory must come from run artifacts.
+**Protocol.** The baselines use the same published manifests, seed 42, eight epochs, batch size 32, and learning rate 1e-4. Image and fusion use ImageNet-pretrained ResNet18. Training images are resized/cropped/flipped; validation uses resize and center crop at 224 pixels with ImageNet normalization. The original paper used 100 epochs, a cosine schedule with warm-up, Adam for EfficientNet/ResNet, early stopping, and best-epoch test reporting; our fixed-final-epoch, eight-epoch AdamW run is a deliberate compute reduction. The training code, source digest, history, predictions, settings, and metrics are saved as described in [REPRODUCE.md](../REPRODUCE.md). The student's L4 GPU is the training device. Wall time and peak allocated GPU memory are taken from saved run artifacts.
 
 ## 5. Improvement hypothesis and controlled comparison
 
@@ -52,16 +54,16 @@ The three modality baselines use the same training and validation manifests. We 
 
 The improvement changes one training input rule and retains the split, backbone, seed, epoch count, optimizer, learning rate, and batch size. The existing p=0 fusion checkpoint is the control. Both checkpoints are evaluated on the same images with clean metadata and with the encoded metadata set entirely to zero. We report the predefined missing-input macro-F1 difference and the clean-input cost, with other metrics and resource use as supporting evidence. This artificial missingness test does not estimate clinical missingness frequency. A single seed and the group-overlapping validation split limit uncertainty and external validity.
 
-## 7. Results — baselines measured, improvement pending
+## 7. Results
 
 | Model / condition | Accuracy | Balanced accuracy | Macro-F1 | ROC-AUC | Time | Peak GPU memory |
 |---|---:|---:|---:|---:|---:|---:|
 | Metadata-only, clean | 0.6580 | 0.6580 | 0.6572 | 0.7145 | 0.24 min | 17.2 MB |
 | Image-only, clean | 0.8191 | 0.8191 | 0.8190 | 0.9085 | 96.31 min | 602.0 MB |
 | Fusion control, clean | 0.8140 | 0.8140 | 0.8133 | 0.9135 | 95.52 min | 808.6 MB |
-| Fusion control, missing metadata | pending JSON | pending JSON | pending JSON | pending JSON | same training run | same training run |
-| Fusion dropout 0.3, clean | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON | pending JSON |
-| Fusion dropout 0.3, missing metadata | pending JSON | pending JSON | pending JSON | pending JSON | same training run | same training run |
+| Fusion control, missing metadata | 0.8084 | 0.8084 | 0.8076 | 0.9096 | same training run | same training run |
+| Fusion dropout 0.3, clean | 0.8267 | 0.8267 | 0.8266 | 0.9120 | 93.68 min | 600.7 MB |
+| Fusion dropout 0.3, missing metadata | 0.8211 | 0.8211 | 0.8210 | 0.9094 | same training run | same training run |
 
 The baseline rows above were read from the student's saved `metrics.json` and `run.json`, not transcribed from screenshots. All report the fixed eighth epoch on 1,962 validation examples. Fusion minus image-only macro-F1 is **-0.0057**, while ROC-AUC is **+0.0051**. At threshold 0.5, fusion has 48 more melanoma false negatives and 38 fewer non-melanoma false positives than image-only. The paired [error analysis](baseline_error_analysis.md) shows that fusion corrects 46 of the image model's melanoma errors but introduces 94 new ones. A higher ranking AUC thus does not imply an improved operating-point F1 or melanoma recall. Exact confusion matrices are in [baseline_results.md](baseline_results.md). This is one seed on a group-overlapping split; no independent-patient effect is claimed.
 
@@ -73,15 +75,21 @@ The baseline rows above were read from the student's saved `metrics.json` and `r
 
 **Figure 4.** Final-epoch confusion matrices. Rows show true class and columns predicted class; melanoma is class 1.
 
-Required remaining artifact: `results/improvement/comparison.json` and improvement `metrics.json` from Google Drive. Calculate intervention minus control separately for clean and missing-metadata conditions. Add the matched confusion matrices, resource comparison, and at least one failure analysis from prediction CSVs.
+![Figure 5. Six measured model conditions](../reports/generated/model_metrics.svg)
+
+**Figure 5.** Validation macro-F1 and ROC-AUC for all six measured conditions. The four fusion conditions use identical validation images and differ only by model training or metadata masking.
+
+**Pre-specified comparison.** Dropout 0.3 minus control macro-F1 is **+0.01334** with all metadata masked and **+0.01333** with metadata present. The clean-to-missing macro-F1 drop is 0.00564 for control and 0.00563 for dropout; their difference is approximately 0.00001. Thus the primary missing-input comparison is positive, but the data do not show an additional robustness gain beyond the general clean-input improvement. Clean ROC-AUC is slightly lower with dropout (0.9120 versus 0.9135). The improved model trained for 93.68 minutes with 600.7 MB peak allocated GPU memory, compared with 95.52 minutes and 808.6 MB for the control. These resource differences are observations from separate Colab runs, not a controlled hardware benchmark.
+
+**Operating-point errors.** Under clean metadata, dropout reduces melanoma false negatives from 242 to 193 while increasing non-melanoma false positives from 123 to 147. Under missing metadata, the corresponding counts are 248 to 201 and 128 to 150. A paired analysis of the saved prediction files finds that, on clean inputs, dropout corrects 113 control errors but creates 88 new errors; for melanoma alone it corrects 82 and creates 33. Under missing metadata it corrects 120 and creates 95 errors, including 91 corrected and 44 new melanoma errors. Masking metadata changes correctness for 83 of 1,962 control predictions and 51 of 1,962 dropout predictions, although both models lose 11 net correct classifications. These paired counts are descriptive; the single seed and overlapping patient/lesion groups prevent a robust clinical claim. Full aggregate tables and matrices are in [measured_results.md](generated/measured_results.md) and [paired error analysis](improvement_error_analysis.md).
 
 ## 8. Limitations, conclusions, and unresolved questions
 
 The authors' validation split has patient and lesion overlap. Missing group IDs prevent a complete patient-independent check on all examples. A higher validation score therefore cannot establish performance on new patients. The reduced backbone and training recipe differ from the selected paper, while its separate test set is not evaluated. A single seed and a single split do not quantify variability. The missing-metadata experiment measures resilience to a defined artificial absence condition, not the full range of real clinical missingness. No clinical deployment claim follows from these results.
 
-The measured baseline suggests that metadata can raise ranking AUC while worsening fixed-threshold macro-F1 and melanoma recall in this implementation. The planned dropout test will show whether missing-input robustness can improve under the same split; its outcome may be positive, neutral, or negative. A future study should freeze patient/lesion-group splits before model selection, repeat multiple seeds, test across acquisition sites, and evaluate calibration and clinically chosen operating thresholds.
+The measured baseline suggests that metadata can raise ranking AUC while worsening fixed-threshold macro-F1 and melanoma recall in this implementation. Metadata dropout improves both clean and missing-input macro-F1 but does not materially change the clean-to-missing degradation; it shifts the operating point toward fewer melanoma misses at the cost of more false alarms. A future study should freeze patient/lesion-group splits before model selection, repeat multiple seeds, test across acquisition sites, and evaluate calibration and clinically chosen operating thresholds.
 
-**Reproducibility and AI-use disclosure.** The public repository linked on page 1 contains code, Colab notebooks, data-access instructions, saved aggregate results, and figure-generation scripts. Exact baseline source SHA-256 and hardware settings are in `results/baselines/*/run.json`; large checkpoints and per-image predictions stay in the student's Drive. Codex assisted with source discovery, coding, visualization, and report editing. The student ran the Colab experiments and remains responsible for citation checks, interpretation, and defending the work.
+**Reproducibility and AI-use disclosure.** The public repository linked on page 1 contains code, Colab notebooks, data-access instructions, saved aggregate results, and figure-generation scripts. Exact source SHA-256 and hardware settings are in each `run.json`; large checkpoints and per-image predictions stay in the student's Drive. Codex assisted with source discovery, coding, visualization, and report editing. The student ran the Colab experiments and remains responsible for citation checks, interpretation, and defending the work.
 
 ## References
 
