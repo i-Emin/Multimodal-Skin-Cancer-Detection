@@ -4,8 +4,6 @@ Ibrahim Emin Ipek · YZM5110 Multimodal Learning Research Project · 17 November
 
 Repository: https://github.com/i-Emin/Multimodal-Skin-Cancer-Detection
 
-Submitted repository snapshot: `codex/submission-2026-11-17`.
-
 **Completed experiment (17 November 2026).** All measurements below were read from saved Colab artifacts after the fixed eighth epoch.
 
 ## Abstract
