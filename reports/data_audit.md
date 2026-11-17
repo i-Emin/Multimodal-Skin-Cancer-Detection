@@ -1,6 +1,6 @@
 # ISIC-DICM-17K data audit
 
-Status: initial Colab inspection, 2026-11-16. Counts below were produced by the student in Colab from the official ISIC-DICM-17K bundle and the authors' published train/validation CSV files, then pasted into the project chat. The files and full execution log have not yet been archived in this repository. No model was trained.
+Status: initial Colab inspection, 2026-11-16. Counts below were produced by the student in Colab from the official ISIC-DICM-17K bundle and the authors' published train/validation CSV files, then pasted into the project chat. Full audit logs have not yet been archived here. Metadata-only and image-only baselines were subsequently trained in Colab; their measured artifacts remain in the student's Drive.
 
 ## Bundle inventory
 
@@ -37,8 +37,8 @@ Across train and validation, `isic_id` overlap is 0, but **433 nonmissing patien
 ## Protocol decision
 
 1. Use the authors' manifest split for a clearly labeled **paper-protocol baseline** and document the group overlap. Keep published scores separate from measured scores. The paper's separate ISIC 2020 Kaggle test remains unreplicated unless its protocol can be accessed.
-2. Run a separate **leakage-controlled internal experiment** on cases with usable group identifiers. Freeze this split before tuning models. Cases lacking identifiers cannot be claimed patient independent. Check both patient and lesion overlap after splitting, and inspect near-duplicate images when possible.
-3. Compare image-only, metadata-only, and fusion models under identical settings within each protocol. Keep the test set untouched until model selection is complete.
+2. A separate **leakage-controlled internal experiment** would be needed to estimate performance on unseen patients. This has not yet been run. Cases lacking identifiers cannot be claimed patient independent. A future study should freeze a patient/lesion-group split before tuning and inspect near-duplicate images.
+3. Compare image-only, metadata-only, and fusion models under identical settings within the published validation protocol, while disclosing its group overlap. Do not call the validation set a clean test set.
 
 Next evidence needed: full Colab audit output saved as a text/JSON artifact, image filename matching, diagnosis-to-author-label cross-tabulation, and a reproducible group-controlled split manifest. Do not commit raw patient metadata or full split manifests publicly without reviewing their contents and licensing.
 
