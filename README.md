@@ -9,7 +9,7 @@ Binary melanoma classification using dermoscopic images and clinical metadata. T
 - **Question:** Does adding age, sex, and anatomical site improve binary classification relative to image-only, and does metadata dropout help when clinical inputs are unavailable?
 - **Data:** [ISIC-DICM-17K official collection](https://api.isic-archive.com/doi/isic-dicm-17k/), 17,060 images. The authors' train and validation manifests supply the binary `class` target. The bundle's `diagnosis_1` field is not used as target or input.
 - **Baselines:** metadata-only MLP, image-only ImageNet-pretrained ResNet18, and concatenation fusion using the same ResNet18 branch. Same published 15,098/1,962 split, seed 42, 8 epochs, batch size 32, and learning rate 1e-4.
-- **Improvement:** mask the encoded metadata vector for 30% of fusion training examples. Evaluate the existing fusion control and improvement on clean and fully missing metadata. Missing-condition macro-F1 is the primary outcome; clean-condition macro-F1 is the cost check. This plan was written before fusion results were observed.
+- **Improvement:** mask the encoded metadata vector for 30% of fusion training examples. Evaluate the existing fusion control and improvement on clean and fully missing metadata. Missing-condition macro-F1 is the primary outcome; clean-condition macro-F1 is the cost check. This plan was written after interim fusion epochs were visible, but before the completed fusion result and before any improved-model outcome.
 - **Limit:** the published validation split shares 433 nonmissing patient IDs and 488 lesion IDs across train/validation. These are distinct identifier counts. Scores are not patient-independent estimates. The paper's separate ISIC 2020 test is not evaluated.
 
 ## Repository map
