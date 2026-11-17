@@ -30,7 +30,7 @@ Binary melanoma classification using dermoscopic images and clinical metadata. T
 
 ## Run
 
-Select a GPU Colab runtime. Run notebook 02 top to bottom for baselines. Once the fusion `final_model.pt` is saved, run notebook 03 for the matched improvement. Notebook 03 can restore the official dataset in a new runtime, but it requires the fusion checkpoint in Google Drive. Full instructions and result paths are in [REPRODUCE.md](REPRODUCE.md).
+Select a GPU Colab runtime. Run notebook 02 top to bottom for baselines. Once the fusion `final_model.pt` is saved, run notebook 03 for the matched improvement. Notebook 03 can restore the official dataset in a new runtime and resume its own training from an epoch checkpoint in Drive, but it requires the fusion baseline checkpoint. Full instructions and result paths are in [REPRODUCE.md](REPRODUCE.md).
 
 Do not use "Run all" in notebook 02 after metadata and image training have completed: it repeats them. A Colab runtime reset clears in-memory model weights; `history.csv` alone cannot resume a model. `final_model.pt` is saved at the fixed final epoch.
 
