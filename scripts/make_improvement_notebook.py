@@ -22,11 +22,12 @@ cells = [
 
 Run this **after** the baseline notebook finishes and `MyDrive/YZM5110/results/baselines/fusion/final_model.pt` exists. The fixed plan is in [improvement_hypothesis.md](https://github.com/i-Emin/Multimodal-Skin-Cancer-Detection/blob/main/reports/improvement_hypothesis.md). This uses the same published train/validation manifests, with their known patient/lesion group overlap. No result is claimed before execution.
 
-Only change: set the full metadata vector to zero for 30% of **training** examples in a new fusion model. Compare both models on clean and fully missing metadata. Do not adjust `p` after seeing the scores.
+Only model change: set the full metadata vector to zero for 30% of **training** examples in a new fusion model. Compare both models on clean and fully missing metadata. Do not adjust `p` after seeing the scores. This notebook saves a resumable training checkpoint after each completed epoch in Drive; if Colab resets, rerun its cells from the top and the improvement training resumes from that checkpoint. The original baseline notebook does **not** have this safeguard.
 """),
     code("""from pathlib import Path
 import torch
 from google.colab import drive
+import urllib.request, zipfile, shutil
 
 if not torch.cuda.is_available():
     raise RuntimeError('Choose a GPU runtime.')
@@ -36,8 +37,20 @@ baseline_dir = Path('/content/drive/MyDrive/YZM5110/results/baselines/fusion')
 improvement_dir = Path('/content/drive/MyDrive/YZM5110/results/improvement')
 if not (baseline_dir / 'final_model.pt').is_file():
     raise FileNotFoundError('Fusion baseline checkpoint missing. Finish notebook 02 first.')
-if not (data_dir / 'images').is_dir():
-    raise FileNotFoundError('Data missing from /content. Run notebook 02 dataset cell to download it.')
+if not (data_dir / 'images').is_dir() or not (data_dir / 'metadata.csv').is_file():
+    archive = Path('/content/isic-dicm-17k.zip')
+    if not archive.exists():
+        print('Downloading official bundle (~6.9 GB)...', flush=True)
+        urllib.request.urlretrieve(
+            'https://isic-archive.s3.amazonaws.com/dois/10.34970-233480/isic-dicm-17k.zip', archive)
+    print('Free disk GB:', round(shutil.disk_usage('/content').free / 1e9, 1))
+    with zipfile.ZipFile(archive) as z:
+        bad = [name for name in z.namelist() if Path(name).is_absolute() or '..' in Path(name).parts]
+        if bad:
+            raise ValueError(f'Unsafe archive paths: {bad[:3]}')
+        z.extractall(data_dir)
+if len(list((data_dir / 'images').glob('*.jpg'))) != 17060:
+    raise RuntimeError('Expected 17,060 JPG images. Check extraction before training.')
 print('GPU:', torch.cuda.get_device_name(0))
 print('Baseline checkpoint:', baseline_dir / 'final_model.pt')
 """),
@@ -55,8 +68,12 @@ This is one additional eight-epoch fusion run. It saves a checkpoint and measure
 args = argparse.Namespace(mode='fusion', data_dir=str(data_dir),
                           output_dir=str(improvement_dir), epochs=8,
                           batch_size=32, lr=1e-4, seed=42, workers=2,
-                          save_checkpoint=True, metadata_dropout_p=0.3)
-run(args)
+                          save_checkpoint=True, metadata_dropout_p=0.3,
+                          resume=True)
+if (improvement_dir / 'fusion' / 'final_model.pt').is_file() and (improvement_dir / 'fusion' / 'metrics.json').is_file():
+    print('Improvement run already complete; using saved results.')
+else:
+    run(args)
 """),
     md("""## Matched clean/missing evaluation
 
