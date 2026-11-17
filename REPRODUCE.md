@@ -8,6 +8,8 @@ The official bundle has 17,060 images and metadata rows. The authors' manifests 
 
 ## Colab sequence
 
+For a fast check needing no dataset, GPU, or external package, run `python scripts/smoke_test_saved_results.py` from the repository root. It recomputes accuracy, balanced accuracy, and macro-F1 from the archived confusion matrices and checks the fixed eighth epoch and the four-condition intervention differences. This checks saved outputs, not training or patient-independent performance.
+
 1. Select a GPU runtime. Run [notebook 01](notebooks/01_dataset_audit_colab.ipynb) for the data audit if starting from scratch.
 2. Run [notebook 02](notebooks/02_baselines_colab.ipynb) for three baselines. It reuses `/content/isic-dicm-17k` or downloads the official ~6.9 GB bundle and saves under `MyDrive/YZM5110/results/baselines/<mode>/`.
 3. Confirm `MyDrive/YZM5110/results/baselines/fusion/final_model.pt` exists. Then run [notebook 03](notebooks/03_metadata_dropout_colab.ipynb). It can restore the dataset after a runtime reset and saves under `MyDrive/YZM5110/results/improvement/`. During improvement training it writes `fusion/epoch_checkpoint.pt` after each completed epoch; rerunning notebook 03 from the top resumes the same model and optimizer at the next epoch. This safeguard applies only to the updated improvement notebook, not the already-running baseline notebook.
@@ -21,7 +23,7 @@ Equivalent command for one mode in a prepared GPU environment:
 python -m src.baseline --mode fusion --data-dir /content/isic-dicm-17k --output-dir /content/drive/MyDrive/YZM5110/results/baselines --epochs 8 --batch-size 32 --lr 1e-4 --seed 42 --save-checkpoint
 ```
 
-Repeat with `--mode metadata` and `--mode image`. Each mode writes `run.json` (configuration, dependencies, GPU, source digest), `history.csv`, `metrics.json` (fixed final epoch, confusion matrix, per-class scores, time, peak GPU memory), `validation_predictions.csv`, and optional `final_model.pt`. The notebooks embed the versioned source and record its SHA-256. The original manifests are read from the authors' GitHub at runtime; freeze their revision for a final archival rerun.
+Repeat with `--mode metadata` and `--mode image`. Each mode writes `run.json` (configuration, dependencies, GPU, source digest), `history.csv`, `metrics.json` (fixed final epoch, confusion matrix, per-class scores, time, peak GPU memory), `validation_predictions.csv`, and optional `final_model.pt`. The notebooks embed the versioned source and record its SHA-256. The completed notebooks read the authors' `main` manifests without logging their bytes or hashes. [Data provenance](data/provenance.md) records the upstream commit and blob IDs observed at review and explains why the completed runs cannot be assigned an exact retrospective manifest hash. A future archival rerun should use the pinned commit in the `BASE` URL in both the source file and embedded notebook source, then record manifest file hashes before training; treat it as a separate experiment.
 
 After all four training runs and notebook 03's matched evaluation complete, generate the report table and SVG from the saved JSON outputs:
 
